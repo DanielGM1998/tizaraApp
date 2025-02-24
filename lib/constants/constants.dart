@@ -8,6 +8,10 @@ const myLogo = 'assets/icon/logo.png';
 
 const nameProveedor = "Proveedor";
 
+const nameAutorizada = "Sol. Autorizadas";
+
+const nameSolicitud = "Solicitudes";
+
 const Color myColor = Color.fromRGBO(0, 0, 0, 1);
 
 const Color myColorIntense = Color.fromRGBO(104, 125, 208,1);

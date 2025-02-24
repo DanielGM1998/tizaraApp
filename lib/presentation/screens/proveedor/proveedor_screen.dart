@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:ui';
 
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/main.dart';
 import '../../../constants/constants.dart';
 import 'package:http/http.dart' as http;
@@ -92,6 +91,49 @@ class _ProveedorScreenState extends State<ProveedorScreen>
       if (kDebugMode) {
         print('Error al cargar datos');
       }
+      HapticFeedback.heavyImpact();
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent, 
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  "Error, verificar conexión a Internet",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontStyle: FontStyle.normal,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 10,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
 
     setState(() {
@@ -147,6 +189,49 @@ class _ProveedorScreenState extends State<ProveedorScreen>
         if (kDebugMode) {
           print('Error al cargar más datos');
         }
+        HapticFeedback.heavyImpact();
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent, 
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    "Error, verificar conexión a Internet",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 10,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
 
       setState(() {
@@ -212,11 +297,15 @@ class _ProveedorScreenState extends State<ProveedorScreen>
             canPop: false,
             onPopInvokedWithResult: (didPop, result) async {
               if (didPop) { return; }
-              Navigator.of(context).pushAndRemoveUntil(
-                _buildPageRoute(const HomeScreen()),
-                (Route<dynamic> route) =>
-                    false, // Remueve todas las páginas previas
+              navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                HomeScreen.routeName,
+                (Route<dynamic> route) => false,
               );
+              // Navigator.of(context).pushAndRemoveUntil(
+              //   _buildPageRoute(const HomeScreen()),
+              //   (Route<dynamic> route) =>
+              //       false, // Remueve todas las páginas previas
+              // );
             },
             child: Container(
               decoration: BoxDecoration(
@@ -227,195 +316,220 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                   tileMode: TileMode.repeated,
                 ),
               ),
-              child: Scaffold(
-                key: _scaffoldKey,
-                backgroundColor: Colors.white.withOpacity(1),
-                drawer: SideMenu(userapp: _userapp!, tipoapp: _tipoapp, idapp: widget.idapp),
-                appBar: AppBar(
-                  title: isSearching
-                      ? TextField(
-                          controller: searchController,
-                          autofocus: true,
-                          onChanged: filterItems,
-                          style: const TextStyle(color: Colors.black, fontSize: 14),
-                          decoration: const InputDecoration(
-                            hintText: "Buscar Servicio o Nombre",
-                            hintStyle: TextStyle(color: Colors.black),
-                            border: InputBorder.none,
+              child: RouteAwareWidget(
+                screenName: "proveedor",
+                child: Scaffold(
+                  key: _scaffoldKey,
+                  backgroundColor: Colors.white.withOpacity(1),
+                  drawer: SideMenu(userapp: _userapp!, tipoapp: _tipoapp!, idapp: widget.idapp),
+                  appBar: AppBar(
+                    title: isSearching
+                        ? TextField(
+                            controller: searchController,
+                            autofocus: true,
+                            onChanged: filterItems,
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                            decoration: const InputDecoration(
+                              hintText: "Buscar Servicio o Nombre",
+                              hintStyle: TextStyle(color: Colors.black),
+                              border: InputBorder.none,
+                            ),
+                          )
+                        : const Text(nameProveedor),
+                    elevation: 1,
+                    shadowColor: myColor,
+                    backgroundColor: Colors.white,
+                    actions: [
+                      IconButton(
+                        icon: Icon(isSearching ? Icons.close : Icons.search),
+                        onPressed: toggleSearch,
+                      ),
+                    ],
+                    iconTheme: const IconThemeData(color: myColor),
+                    leading: Row(
+                      children: [
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(Icons.menu),
+                            onPressed: () {
+                              _scaffoldKey.currentState?.openDrawer();
+                            },
                           ),
-                        )
-                      : const Text(nameProveedor),
-                  elevation: 1,
-                  shadowColor: myColor,
-                  backgroundColor: Colors.white,
-                  actions: [
-                    IconButton(
-                      icon: Icon(isSearching ? Icons.close : Icons.search),
-                      onPressed: toggleSearch,
-                    ),
-                  ],
-                  iconTheme: const IconThemeData(color: myColor),
-                  leading: Row(
-                    children: [
-                      Builder(
-                        builder: (context) => IconButton(
-                          icon: const Icon(Icons.menu),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.home_outlined),
                           onPressed: () {
-                            _scaffoldKey.currentState?.openDrawer();
+                            navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                              HomeScreen.routeName,
+                              (Route<dynamic> route) => false,
+                            );
+                            // Navigator.of(context).pushAndRemoveUntil(
+                            //   _buildPageRoute(const HomeScreen()),
+                            //   (Route<dynamic> route) =>
+                            //       false, // Remueve todas las páginas previas
+                            // );
                           },
                         ),
+                      ],
+                    ),
+                    leadingWidth: _size.width * 0.28,
+                  ),
+                  resizeToAvoidBottomInset: false,
+                  body: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: const Alignment(0.0, 1.3),
+                            colors: colors,
+                            tileMode: TileMode.repeated,
+                          ),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.home_outlined),
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            _buildPageRoute(const HomeScreen()),
-                            (Route<dynamic> route) =>
-                                false, // Remueve todas las páginas previas
-                          );
-                        },
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 0.0),
+                        child: CustomRefreshIndicator(
+                          builder: MaterialIndicatorDelegate(
+                            builder: (context, controller) {
+                              return Icon(
+                                Icons.refresh_outlined,
+                                color: myColor,
+                                size: _size.width * 0.1,
+                              );
+                            },
+                          ),
+                          onRefresh: () async {
+                            isFirstLoadRunning = false;
+                            hasNextPage = true;
+                            isLoadMoreRunning = false;
+                            items = [];
+                            page = 1;
+                            fistLoad();
+                            controller = ScrollController()..addListener(loadMore);
+                            return setState(() {});
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (isFirstLoadRunning)
+                                const Center(
+                                  child: CircularProgressIndicator(color: myColor),
+                                )
+                              else
+                                Expanded(
+                                  child: ListView.builder(
+                                    controller: controller,
+                                    itemCount: filteredItems.length +
+                                        (isLoadMoreRunning ? 1 : 0),
+                                    itemBuilder: (context, index) {
+                                      if (index == items.length) {
+                                        return const Padding(
+                                          padding: EdgeInsets.all(10),
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                                color: myColor),
+                                          ),
+                                        );
+                                      }
+                
+                                      final item = filteredItems[index];
+                                      return InkWell(
+                                        onTap: _tipoapp == "3"
+                                        ? () async{
+                                            //log(item['data_id']);
+                                            await _onWillPop(item['data_id'], item['servicio'], item['nombre_contacto']);
+                                          }
+                                        : null,
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20.0),
+                                          ),
+                                          elevation: 5,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  backgroundColor: Colors.green,
+                                                  radius: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.06,
+                                                  child: const Icon(Icons.person,
+                                                      color: Colors.white),
+                                                ),
+                                                SizedBox(
+                                                    width: MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.04),
+                                                Expanded(
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            item['servicio'],
+                                                            style: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            item['nombre_contacto'],
+                                                            style: const TextStyle(
+                                                                fontSize: 16),
+                                                          ),
+                                                          Text(
+                                                            item['telefono'] == ""
+                                                                ? "S/N"
+                                                                : item['telefono'],
+                                                            style: const TextStyle(
+                                                                fontSize: 12),
+                                                          ),
+                                                          Text(
+                                                            item['correo'] == ""
+                                                                ? "Sin correo electrónico"
+                                                                : item['correo'],
+                                                            style: const TextStyle(
+                                                                fontSize: 12),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Align(
+                                                        alignment: Alignment.centerRight,
+                                                        child: Padding(
+                                                          padding: EdgeInsets.only(right: _size.width * 0.01),
+                                                          child: const Icon(
+                                                            Icons.arrow_forward_ios_outlined,
+                                                            size: 24,
+                                                            color: Colors.green
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  leadingWidth: _size.width * 0.28,
-                ),
-                resizeToAvoidBottomInset: false,
-                body: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: const Alignment(0.0, 1.3),
-                          colors: colors,
-                          tileMode: TileMode.repeated,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 0.0),
-                      child: CustomRefreshIndicator(
-                        builder: MaterialIndicatorDelegate(
-                          builder: (context, controller) {
-                            return Icon(
-                              Icons.refresh_outlined,
-                              color: myColor,
-                              size: _size.width * 0.1,
-                            );
-                          },
-                        ),
-                        onRefresh: () async {
-                          isFirstLoadRunning = false;
-                          hasNextPage = true;
-                          isLoadMoreRunning = false;
-                          items = [];
-                          page = 1;
-                          fistLoad();
-                          controller = ScrollController()..addListener(loadMore);
-                          return setState(() {});
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (isFirstLoadRunning)
-                              const Center(
-                                child: CircularProgressIndicator(color: myColor),
-                              )
-                            else
-                              Expanded(
-                                child: ListView.builder(
-                                  controller: controller,
-                                  itemCount: filteredItems.length +
-                                      (isLoadMoreRunning ? 1 : 0),
-                                  itemBuilder: (context, index) {
-                                    if (index == items.length) {
-                                      return const Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                              color: myColor),
-                                        ),
-                                      );
-                                    }
-              
-                                    final item = filteredItems[index];
-                                    return InkWell(
-                                      onTap: () async{
-                                        await _onWillPop(item['data_id'], item['servicio'], item['nombre_contacto']);
-                                        log(item['data_id']);
-                                      },
-                                      child: Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20.0),
-                                        ),
-                                        elevation: 5,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: Row(
-                                            children: [
-                                              CircleAvatar(
-                                                backgroundColor: Colors.green,
-                                                radius: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.07,
-                                                child: const Icon(Icons.person,
-                                                    color: Colors.white),
-                                              ),
-                                              SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.02),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      item['servicio'],
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      item['nombre_contacto'],
-                                                      style: const TextStyle(
-                                                          fontSize: 16),
-                                                    ),
-                                                    Text(
-                                                      item['telefono'] == ""
-                                                          ? "S/N"
-                                                          : item['telefono'],
-                                                      style: const TextStyle(
-                                                          fontSize: 12),
-                                                    ),
-                                                    Text(
-                                                      item['correo'] == ""
-                                                          ? "Sin correo electrónico"
-                                                          : item['correo'],
-                                                      style: const TextStyle(
-                                                          fontSize: 12),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -548,26 +662,26 @@ class _ProveedorScreenState extends State<ProveedorScreen>
   }
 }
 
-PageRouteBuilder _buildPageRoute(Widget page) {
-  return PageRouteBuilder(
-    barrierColor: Colors.black.withOpacity(0.6),
-    opaque: false,
-    pageBuilder: (_, __, ___) => page,
-    transitionDuration: const Duration(milliseconds: 200),
-    transitionsBuilder: (_, animation, __, child) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 5 * animation.value,
-          sigmaY: 5 * animation.value,
-        ),
-        child: FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
-      );
-    },
-  );
-}
+// PageRouteBuilder _buildPageRoute(Widget page) {
+//   return PageRouteBuilder(
+//     barrierColor: Colors.black.withOpacity(0.6),
+//     opaque: false,
+//     pageBuilder: (_, __, ___) => page,
+//     transitionDuration: const Duration(milliseconds: 200),
+//     transitionsBuilder: (_, animation, __, child) {
+//       return BackdropFilter(
+//         filter: ImageFilter.blur(
+//           sigmaX: 5 * animation.value,
+//           sigmaY: 5 * animation.value,
+//         ),
+//         child: FadeTransition(
+//           opacity: animation,
+//           child: child,
+//         ),
+//       );
+//     },
+//   );
+// }
 
 // Entrada
 Future<String> _entrada(idUsuario, proveedorId) async {

@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:awesome_top_snackbar/awesome_top_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/presentation/screens/home/home_screen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +24,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String _telefono = "";
+  // ignore: non_constant_identifier_names
+  String _tel_email = "";
   String _contrasena = "";
   bool _passwordVisible = true;
   var textController = TextEditingController();
@@ -59,240 +60,259 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pop(value);
         }
       },
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment(0.0, 1.3),
-              colors: <Color>[
-                myColorBackground1,
-                myColorBackground2,
-              ],
-              tileMode: TileMode.repeated,
+      child: RouteAwareWidget(
+        screenName: "login",
+        child: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment(0.0, 1.3),
+                colors: <Color>[
+                  myColorBackground1,
+                  myColorBackground2,
+                ],
+                tileMode: TileMode.repeated,
+              ),
             ),
-          ),
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 120,
-                      ),
-                      Image.asset(myLogo, width: _size.width * 0.50),
-                      SizedBox(
-                        height: _size.height * 0.12,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: const Text(
-                              "Inicio de Sesión",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: myColor,
-                                  fontSize: 25),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                          SizedBox(height: _size.height * 0.02),
-                          //////
-                          Column(
-                            children: <Widget>[
-                              SizedBox(
-                                height: _size.height * 0.012,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 120,
+                        ),
+                        Image.asset(myLogo, width: _size.width * 0.50),
+                        SizedBox(
+                          height: _size.height * 0.12,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: const Text(
+                                "Inicio de Sesión",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: myColor,
+                                    fontSize: 25),
+                                textAlign: TextAlign.left,
                               ),
-                              Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: ThemeData().colorScheme.copyWith(
-                                        primary: myColor,
-                                      ),
+                            ),
+                            SizedBox(height: _size.height * 0.02),
+                            //////
+                            Column(
+                              children: <Widget>[
+                                SizedBox(
+                                  height: _size.height * 0.012,
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10),
-                                  child: TextField(
-                                    maxLength: 10,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                            decimal: false, signed: false),
-                                    inputFormatters: <TextInputFormatter>[
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    cursorColor: myColor,
-                                    onChanged: (valor) {
-                                      setState(() {
-                                        _telefono = valor;
-                                      });
-                                    },
-                                    decoration: const InputDecoration(
-                                        border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10))),
-                                        hintText: "Teléfono del usuario",
-                                        labelText: "Teléfono",
-                                        labelStyle: TextStyle(color: myColor),
-                                        suffixIcon: Icon(
-                                          Icons.numbers,
-                                          size: 30,
-                                          color: myColor,
+                                Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ThemeData().colorScheme.copyWith(
+                                          primary: myColor,
                                         ),
-                                        icon: Icon(
-                                          Icons.numbers_outlined,
-                                          color: myColor,
-                                        )),
-                                    textInputAction: TextInputAction.next,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 10),
+                                    child: TextField(
+                                      keyboardType:
+                                          TextInputType.multiline,
+                                      cursorColor: myColor,
+                                      onChanged: (valor) {
+                                        setState(() {
+                                          _tel_email = valor;
+                                        });
+                                      },
+                                      decoration: const InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10))),
+                                          hintText: "Teléfono o Email del usuario",
+                                          hintStyle: TextStyle(fontSize: 14),
+                                          labelText: "Teléfono o Email",
+                                          labelStyle: TextStyle(color: myColor),
+                                          suffixIcon: Icon(
+                                            Icons.numbers,
+                                            size: 30,
+                                            color: myColor,
+                                          ),
+                                          icon: Icon(
+                                            Icons.numbers_outlined,
+                                            color: myColor,
+                                          )),
+                                      textInputAction: TextInputAction.next,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: _size.height * 0.012,
-                              ),
-                              Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: ThemeData().colorScheme.copyWith(
-                                        primary: myColor,
-                                      ),
+                                SizedBox(
+                                  height: _size.height * 0.012,
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10),
-                                  child: TextField(
-                                    obscureText: _passwordVisible,
-                                    enableSuggestions: false,
-                                    autocorrect: false,
-                                    cursorColor: myColor,
-                                    onChanged: (valor) {
-                                      setState(() {
-                                        _contrasena = valor;
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                        border: const OutlineInputBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10))),
-                                        hintText: "Contraseña del usuario",
-                                        labelText: "Contraseña",
-                                        labelStyle:
-                                            const TextStyle(color: myColor),
-                                        suffixIcon: IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _passwordVisible =
-                                                    !_passwordVisible;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              _passwordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                              size: 30,
-                                              color: myColor,
-                                            )),
-                                        icon: const Icon(
-                                          Icons.bookmark,
-                                          color: myColor,
-                                        )),
-                                    textInputAction: TextInputAction.done,
-                                    onSubmitted: (value) async {
-                                      if (_telefono != "" &&
-                                          _contrasena != "") {
-                                        //bool isValid =
-                                        //EmailValidator.validate(_telefono);
-                                        //if (isValid) {
-                                        if (_contrasena.length < 5) {
+                                Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ThemeData().colorScheme.copyWith(
+                                          primary: myColor,
+                                        ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 10),
+                                    child: TextField(
+                                      obscureText: _passwordVisible,
+                                      enableSuggestions: false,
+                                      autocorrect: false,
+                                      cursorColor: myColor,
+                                      onChanged: (valor) {
+                                        setState(() {
+                                          _contrasena = valor;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                          border: const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10))),
+                                          hintText: "Contraseña del usuario",
+                                          labelText: "Contraseña",
+                                          labelStyle:
+                                              const TextStyle(color: myColor),
+                                          suffixIcon: IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  _passwordVisible =
+                                                      !_passwordVisible;
+                                                });
+                                              },
+                                              icon: Icon(
+                                                _passwordVisible
+                                                    ? Icons.visibility
+                                                    : Icons.visibility_off,
+                                                size: 30,
+                                                color: myColor,
+                                              )),
+                                          icon: const Icon(
+                                            Icons.bookmark,
+                                            color: myColor,
+                                          )),
+                                      textInputAction: TextInputAction.done,
+                                      onSubmitted: (value) async {
+                                        if (_tel_email != "" &&
+                                            _contrasena != "") {
+                                          //bool isValid =
+                                          //EmailValidator.validate(_tel_email);
+                                          //if (isValid) {
+                                          if (_contrasena.length < 5) {
+                                            awesomeTopSnackbar(
+                                              context,
+                                              "La contraseña debe incluir al menos 5 caracteres",
+                                              textStyle: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontStyle: FontStyle.normal,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 20),
+                                              backgroundColor:
+                                                  Colors.orangeAccent,
+                                              icon: const Icon(Icons.check,
+                                                  color: Colors.black),
+                                              iconWithDecoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                    color: Colors.black),
+                                              ),
+                                            );
+                                          } else {
+                                            showProgress(
+                                                context, _tel_email, _contrasena);
+                                          }
+                                          // } else {
+                                          //   awesomeTopSnackbar(
+                                          //     context,
+                                          //     "Debe ingresar un Email valido",
+                                          //     textStyle: const TextStyle(
+                                          //         color: Colors.white,
+                                          //         fontStyle: FontStyle.normal,
+                                          //         fontWeight: FontWeight.w400,
+                                          //         fontSize: 20),
+                                          //     backgroundColor:
+                                          //         Colors.orangeAccent,
+                                          //     icon: const Icon(Icons.check,
+                                          //         color: Colors.black),
+                                          //     iconWithDecoration: BoxDecoration(
+                                          //       borderRadius:
+                                          //           BorderRadius.circular(20),
+                                          //       border: Border.all(
+                                          //           color: Colors.black),
+                                          //     ),
+                                          //   );
+                                          // }
+                                        } else {
                                           awesomeTopSnackbar(
                                             context,
-                                            "La contraseña debe incluir al menos 5 caracteres",
+                                            "Debe ingresar teléfono y contraseña",
                                             textStyle: const TextStyle(
                                                 color: Colors.white,
                                                 fontStyle: FontStyle.normal,
                                                 fontWeight: FontWeight.w400,
                                                 fontSize: 20),
-                                            backgroundColor:
-                                                Colors.orangeAccent,
+                                            backgroundColor: Colors.orangeAccent,
                                             icon: const Icon(Icons.check,
                                                 color: Colors.black),
                                             iconWithDecoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(20),
-                                              border: Border.all(
-                                                  color: Colors.black),
+                                              border:
+                                                  Border.all(color: Colors.black),
                                             ),
                                           );
-                                        } else {
-                                          showProgress(
-                                              context, _telefono, _contrasena);
                                         }
-                                        // } else {
-                                        //   awesomeTopSnackbar(
-                                        //     context,
-                                        //     "Debe ingresar un Email valido",
-                                        //     textStyle: const TextStyle(
-                                        //         color: Colors.white,
-                                        //         fontStyle: FontStyle.normal,
-                                        //         fontWeight: FontWeight.w400,
-                                        //         fontSize: 20),
-                                        //     backgroundColor:
-                                        //         Colors.orangeAccent,
-                                        //     icon: const Icon(Icons.check,
-                                        //         color: Colors.black),
-                                        //     iconWithDecoration: BoxDecoration(
-                                        //       borderRadius:
-                                        //           BorderRadius.circular(20),
-                                        //       border: Border.all(
-                                        //           color: Colors.black),
-                                        //     ),
-                                        //   );
-                                        // }
-                                      } else {
-                                        awesomeTopSnackbar(
-                                          context,
-                                          "Debe ingresar teléfono y contraseña",
-                                          textStyle: const TextStyle(
-                                              color: Colors.white,
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 20),
-                                          backgroundColor: Colors.orangeAccent,
-                                          icon: const Icon(Icons.check,
-                                              color: Colors.black),
-                                          iconWithDecoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border:
-                                                Border.all(color: Colors.black),
-                                          ),
-                                        );
-                                      }
-                                    },
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: _size.height * 0.02,
-                              ),
-                            ],
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            margin: const EdgeInsets.only(
-                                top: 10, right: 40, left: 40),
-                            child: OutlinedButton(
-                              onPressed: () async {
-                                if (_telefono != "" && _contrasena != "") {
-                                  if (_contrasena.length < 5) {
+                                SizedBox(
+                                  height: _size.height * 0.02,
+                                ),
+                              ],
+                            ),
+                            Container(
+                              alignment: Alignment.centerRight,
+                              margin: const EdgeInsets.only(
+                                  top: 10, right: 40, left: 40),
+                              child: OutlinedButton(
+                                onPressed: () async {
+                                  if (_tel_email != "" && _contrasena != "") {
+                                    if (_contrasena.length < 5) {
+                                      awesomeTopSnackbar(
+                                        context,
+                                        "La contraseña debe incluir al menos 5 caracteres",
+                                        textStyle: const TextStyle(
+                                            color: Colors.white,
+                                            fontStyle: FontStyle.normal,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16),
+                                        backgroundColor: Colors.redAccent,
+                                        icon: const Icon(Icons.error,
+                                            color: Colors.black),
+                                        iconWithDecoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),
+                                          border: Border.all(color: Colors.black),
+                                        ),
+                                      );
+                                    } else {
+                                      showProgress(
+                                          context, _tel_email, _contrasena);
+                                    }
+                                  } else {
                                     awesomeTopSnackbar(
                                       context,
-                                      "La contraseña debe incluir al menos 5 caracteres",
+                                      "Debe ingresar teléfono y contraseña",
                                       textStyle: const TextStyle(
                                           color: Colors.white,
                                           fontStyle: FontStyle.normal,
@@ -306,45 +326,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                         border: Border.all(color: Colors.black),
                                       ),
                                     );
-                                  } else {
-                                    showProgress(
-                                        context, _telefono, _contrasena);
                                   }
-                                } else {
-                                  awesomeTopSnackbar(
-                                    context,
-                                    "Debe ingresar teléfono y contraseña",
-                                    textStyle: const TextStyle(
-                                        color: Colors.white,
-                                        fontStyle: FontStyle.normal,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16),
-                                    backgroundColor: Colors.redAccent,
-                                    icon: const Icon(Icons.error,
-                                        color: Colors.black),
-                                    iconWithDecoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.black),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: const Text(
-                                "Iniciar sesión",
-                                style: TextStyle(color: myColor),
+                                },
+                                child: const Text(
+                                  "Iniciar sesión",
+                                  style: TextStyle(color: myColor),
+                                ),
                               ),
                             ),
-                          ),
-                          Container(
-                              color: Colors.transparent,
-                              height: _size.height * 0.10),
-                        ],
-                      ),
-                    ],
+                            Container(
+                                color: Colors.transparent,
+                                height: _size.height * 0.10),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -376,9 +376,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-Future<String> _check(telefono, pass) async {
+// ignore: non_constant_identifier_names
+Future<String> _check(tel_email, pass) async {
   try {
-    var data = {"dato": telefono, "contrasena": pass};
+    var data = {"dato": tel_email, "contrasena": pass};
     final response = await http.post(
       Uri(
         scheme: https,
@@ -421,16 +422,16 @@ Future<String> _check(telefono, pass) async {
   }
 }
 
-showProgress(BuildContext context, String telefono, String pass) async {
+showProgress(BuildContext context, String telEmail, String pass) async {
   var result = await showDialog(
     context: context,
-    builder: (context) => FutureProgressDialog(_check(telefono, pass)),
+    builder: (context) => FutureProgressDialog(_check(telEmail, pass)),
   );
-  showResultDialog(context, result, telefono, pass);
+  showResultDialog(context, result, telEmail, pass);
 }
 
 Future<void> showResultDialog(
-    BuildContext context, String result, String telefono, String pass) async {
+    BuildContext context, String result, String telEmail, String pass) async {
   var splitted = result.split(',');
   if (result == 'Error, verificar conexión a Internet') {
     awesomeTopSnackbar(

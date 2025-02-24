@@ -1,14 +1,21 @@
 import 'package:cloudflare/cloudflare.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/constants/constants.dart';
 import 'package:tizara/presentation/screens/home/home_screen.dart';
 import 'package:tizara/presentation/screens/login/login_screen.dart';
+import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
+import 'package:tizara/presentation/screens/proveedor/proveedor_screen.dart';
+import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
 import 'package:tizara/presentation/screens/splash/splash_screen.dart';
 
 import 'config/theme/app_theme.dart';
@@ -34,8 +41,18 @@ void configEasyLoading() {
     ..userInteractions = false;
 }
 
+// Manejador de mensajes en segundo plano
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Maneja el mensaje en segundo plano
+}
+
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  // Configura el manejador de mensajes en segundo plano
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     
   await initializeDateFormatting('es', null); // Inicializa para español
   Intl.defaultLocale = 'es'; // Configura el locale predeterminado
@@ -99,12 +116,26 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       scaffoldMessengerKey: scaffoldMessengerKey,
       theme: AppTheme(selectedColor: 0).getTheme(),
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('zh', ''),
+        Locale('he', ''),
+        Locale('es', ''),
+        Locale('ru', ''),
+        Locale('ko', ''),
+        Locale('hi', ''),
+      ],
       builder: EasyLoading.init(),
+      navigatorObservers: [appRouteObserver],
       initialRoute: SplashScreen.routeName,
       routes: {
         SplashScreen.routeName: (BuildContext context) => const SplashScreen(),
         LoginScreen.routeName: (BuildContext context) => const LoginScreen(),
         HomeScreen.routeName: (BuildContext context) => const HomeScreen(),
+        ProveedorScreen.routeName: (context) => const ProveedorScreen(idapp: ""),
+        AutorizadasScreen.routeName: (context) => const AutorizadasScreen(idapp: ""),
+        SolicitudesScreen.routeName: (context) => const SolicitudesScreen(idapp: ""),
       },
     );
   }

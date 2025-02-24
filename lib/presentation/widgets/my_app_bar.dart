@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:tizara/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +31,7 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
               await prefs.remove("email");
               await prefs.remove("usuario_tipo_id");
               await prefs.remove("pass");
+              await prefs.remove("token");
               Navigator.pushReplacementNamed(context, 'login');
             },
             child: const Text('Si'),
@@ -63,10 +62,14 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
         IconButton(
           icon: const Icon(Icons.home_outlined), 
           onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-              _buildPageRoute(const HomeScreen()),
-              (Route<dynamic> route) => false, // Remueve todas las páginas previas
+            navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              HomeScreen.routeName,
+              (Route<dynamic> route) => false,
             );
+            // Navigator.of(context).pushAndRemoveUntil(
+            //   _buildPageRoute(const HomeScreen()),
+            //   (Route<dynamic> route) => false, // Remueve todas las páginas previas
+            // );
           },
         ),
       ],
@@ -108,23 +111,23 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
   );
 }
 
-PageRouteBuilder _buildPageRoute(Widget page) {
-  return PageRouteBuilder(
-    barrierColor: Colors.black.withOpacity(0.6),
-    opaque: false,
-    pageBuilder: (_, __, ___) => page,
-    transitionDuration: const Duration(milliseconds: 200),
-    transitionsBuilder: (_, animation, __, child) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 5 * animation.value,
-          sigmaY: 5 * animation.value,
-        ),
-        child: FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
-      );
-    },
-  );
-}
+// PageRouteBuilder _buildPageRoute(Widget page) {
+//   return PageRouteBuilder(
+//     barrierColor: Colors.black.withOpacity(0.6),
+//     opaque: false,
+//     pageBuilder: (_, __, ___) => page,
+//     transitionDuration: const Duration(milliseconds: 200),
+//     transitionsBuilder: (_, animation, __, child) {
+//       return BackdropFilter(
+//         filter: ImageFilter.blur(
+//           sigmaX: 5 * animation.value,
+//           sigmaY: 5 * animation.value,
+//         ),
+//         child: FadeTransition(
+//           opacity: animation,
+//           child: child,
+//         ),
+//       );
+//     },
+//   );
+// }
