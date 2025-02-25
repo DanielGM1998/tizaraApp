@@ -500,12 +500,14 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                                                 fontSize: 16),
                                                           ),
                                                           Text(
-                                                            item['fecha_ejecucion'],
+                                                            "Fecha de Ejecución: "+item['fecha_ejecucion'],
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
                                                           Text(
-                                                            item['hora_ejecucion'],
+                                                            item['hora_ejecucion']==""
+                                                            ? "Todo el día"
+                                                            : "Hora de Ejecución: "+item['hora_ejecucion'],
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
@@ -977,6 +979,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       decoration: TextDecoration.underline,
     );
     final config = CalendarDatePicker2WithActionButtonsConfig(
+      firstDate: DateTime.now(),
       dayTextStyle: dayTextStyle,
       calendarType: CalendarDatePicker2Type.range,
       selectedDayHighlightColor: Colors.blueAccent,

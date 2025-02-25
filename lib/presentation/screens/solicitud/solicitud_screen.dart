@@ -467,6 +467,11 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                                 fontSize: 16),
                                                           ),
                                                           Text(
+                                                            "Fecha solicitud: "+item['fecha_solicita'],
+                                                            style: const TextStyle(
+                                                                fontSize: 12),
+                                                          ),
+                                                          Text(
                                                             item['status'] == "0"
                                                             ? "CANCELADA"
                                                             : item['status'] == "1"
@@ -478,12 +483,14 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                             ),
                                                           ),
                                                           Text(
-                                                            item['fecha_ejecucion'],
+                                                            "Fecha de Ejecución: "+item['fecha_ejecucion'],
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
                                                           Text(
-                                                            item['hora_ejecucion'],
+                                                            item['hora_ejecucion']==""
+                                                            ? "Todo el día"
+                                                            : "Hora de Ejecución: "+item['hora_ejecucion'],
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
@@ -617,9 +624,9 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                       backgroundColor: Colors.orangeAccent, 
                     ),
                     onPressed: () async{
-                      _comentarioController.text="";
                       Navigator.of(context).pop(false);
                       await showProgressDenegada(context, idUsuario, solicitudId, _comentarioController.text);
+                      _comentarioController.text="";
                     },
                     child: const Text('Denegar'),
                   ),
