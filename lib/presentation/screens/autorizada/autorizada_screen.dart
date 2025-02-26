@@ -240,7 +240,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
         filteredItems = items.where((item) {
           final solicitante = removeDiacritics(item['solicitante'] ?? '');
           final local =
-              removeDiacritics(item['fecha_ejecucion'] ?? '');
+              removeDiacritics(item['local'] ?? '');
           return solicitante.contains(normalizedQuery) ||
               local.contains(normalizedQuery);
         }).toList();
@@ -979,7 +979,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       decoration: TextDecoration.underline,
     );
     final config = CalendarDatePicker2WithActionButtonsConfig(
-      firstDate: DateTime.now(),
+      //firstDate: DateTime.now(),
       dayTextStyle: dayTextStyle,
       calendarType: CalendarDatePicker2Type.range,
       selectedDayHighlightColor: Colors.blueAccent,

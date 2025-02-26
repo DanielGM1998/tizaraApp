@@ -233,7 +233,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
         filteredItems = items.where((item) {
           final solicitante = removeDiacritics(item['solicitante'] ?? '');
           final local =
-              removeDiacritics(item['fecha_ejecucion'] ?? '');
+              removeDiacritics(item['local'] ?? '');
           return solicitante.contains(normalizedQuery) ||
               local.contains(normalizedQuery);
         }).toList();
