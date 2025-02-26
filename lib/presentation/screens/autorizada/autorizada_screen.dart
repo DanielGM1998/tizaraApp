@@ -979,6 +979,12 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       decoration: TextDecoration.underline,
     );
     final config = CalendarDatePicker2WithActionButtonsConfig(
+      selectableDayPredicate:(DateTime day) {
+        DateTime today = DateTime.now();
+        return day.year == today.year &&
+            day.month == today.month &&
+            day.day == today.day;
+      },
       //firstDate: DateTime.now(),
       dayTextStyle: dayTextStyle,
       calendarType: CalendarDatePicker2Type.range,
