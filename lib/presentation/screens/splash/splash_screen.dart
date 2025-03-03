@@ -11,10 +11,10 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class SplashScreenState extends State<SplashScreen> {
   String? userIsLoggedIn;
 
   getLoggedInState() async {
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return FutureBuilder(
       future: getLoggedInState(),
       builder: (context, snapshot) {
@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
               tileMode: TileMode.repeated,
             ),
             logo: Image.asset(myLogo, scale: 5),
-            logoWidth: _size.height*0.2,
+            logoWidth: size.height*0.2,
             showLoader: true,
             loaderColor: myColor,
             navigator: const HomeScreen(),
@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
               tileMode: TileMode.repeated,
             ),
             logo: Image.asset(myLogo, scale: 5),
-            logoWidth: _size.height*0.2,
+            logoWidth: size.height*0.2,
             showLoader: true,
             loaderColor: myColor,
             navigator: const LoginScreen(),

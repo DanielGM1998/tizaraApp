@@ -5,8 +5,8 @@ import '../../constants/constants.dart';
 import '../screens/home/home_screen.dart';
 
 AppBar myAppBar(BuildContext context, String name, String idapp) {
-  final Size _size = MediaQuery.of(context).size;
-  Future<bool> _onWillPop1() async {
+  final Size size = MediaQuery.of(context).size;
+  Future<bool> onWillPop1() async {
     return (await showDialog(
       barrierDismissible: false,
       context: context,
@@ -32,6 +32,7 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
               await prefs.remove("usuario_tipo_id");
               await prefs.remove("pass");
               await prefs.remove("token");
+              // ignore: use_build_context_synchronously
               Navigator.pushReplacementNamed(context, 'login');
             },
             child: const Text('Si'),
@@ -74,7 +75,7 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
         ),
       ],
     ),
-    leadingWidth: _size.width * 0.28,
+    leadingWidth: size.width * 0.28,
     actions: <Widget>[
       // IconButton(
       //   onPressed: () async{
@@ -92,7 +93,7 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
               child: Row(
                 children: [
                   const Icon(Icons.login),
-                  SizedBox(width: _size.width * 0.03),
+                  SizedBox(width: size.width * 0.03),
                   const Text("Cerrar sesión", style: TextStyle(color: myColor)),
                 ],
               ),
@@ -101,7 +102,7 @@ AppBar myAppBar(BuildContext context, String name, String idapp) {
         },
         onSelected: (value) {
           if (value == 1) {
-            _onWillPop1();
+            onWillPop1();
           }else if (value == 2) {
             
           }

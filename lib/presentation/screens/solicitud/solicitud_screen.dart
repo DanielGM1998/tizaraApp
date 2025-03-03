@@ -71,7 +71,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     DateTime.now(),
   ];
 
-  String now = DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -15)))+" a "+DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String now = "${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -15)))} a ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
 
   String inicio = "null", fin = "null";
 
@@ -91,7 +91,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAll/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAll/$inicio/$fin',
           ),
         );
       }else if(inicio == "null"){
@@ -100,7 +100,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAll/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAll/$inicio/$fin',
           ),
         );
       }else if(fin == "null"){
@@ -109,7 +109,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAll/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAll/$inicio/$fin',
           ),
         );
       }else{
@@ -117,7 +117,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAll/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAll/$inicio/$fin',
           ),
         );
       }
@@ -250,7 +250,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return FutureBuilder(
       future: getVariables(),
       builder: (context, snapshot) {
@@ -324,7 +324,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                         ),
                       ],
                     ),
-                    leadingWidth: _size.width * 0.28,
+                    leadingWidth: size.width * 0.28,
                   ),
                   resizeToAvoidBottomInset: false,
                   body: Stack(
@@ -343,12 +343,13 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 0.0),
                         child: CustomRefreshIndicator(
+                          // ignore: implicit_call_tearoffs
                           builder: MaterialIndicatorDelegate(
                             builder: (context, controller) {
                               return Icon(
                                 Icons.refresh_outlined,
                                 color: myColor,
-                                size: _size.width * 0.1,
+                                size: size.width * 0.1,
                               );
                             },
                           ),
@@ -367,7 +368,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (!isFirstLoadRunning)
-                                SizedBox(height: _size.height * 0.005),
+                                SizedBox(height: size.height * 0.005),
                               if (!isFirstLoadRunning)
                                 Container(
                                   decoration: BoxDecoration(
@@ -460,14 +461,18 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                               fontSize: 16,
                                                               fontWeight: FontWeight.bold,
                                                             ),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
                                                             item['local'],
                                                             style: const TextStyle(
                                                                 fontSize: 16),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
-                                                            "Fecha solicitud: "+item['fecha_solicita'],
+                                                            "Fecha solicitud: ${item['fecha_solicita']}",
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
@@ -483,14 +488,14 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                             ),
                                                           ),
                                                           Text(
-                                                            "Fecha de Ejecución: "+item['fecha_ejecucion'],
+                                                            "Fecha de Ejecución: ${item['fecha_ejecucion']}",
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
                                                           Text(
                                                             item['hora_ejecucion']==""
                                                             ? "Todo el día"
-                                                            : "Hora de Ejecución: "+item['hora_ejecucion'],
+                                                            : "Hora de Ejecución: ${item['hora_ejecucion']}",
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
@@ -499,7 +504,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                       Align(
                                                         alignment: Alignment.centerRight,
                                                         child: Padding(
-                                                          padding: EdgeInsets.only(right: _size.width * 0.01),
+                                                          padding: EdgeInsets.only(right: size.width * 0.01),
                                                           child: Icon(
                                                             Icons.arrow_forward_ios_outlined,
                                                             size: 24,
@@ -539,12 +544,12 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
   }
 
   Future<bool> _onWillPop(String id, String local, String status) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text("Solicitud de "+local, textAlign: TextAlign.center),
+            title: Text("Solicitud de $local", textAlign: TextAlign.center),
             //content: Text("", textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
@@ -559,12 +564,14 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                     onPressed: () async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       String? idapp = prefs.getString("id");
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pop(false);
+                      // ignore: use_build_context_synchronously
                       await _motivo(context, idapp!, id);
                     },
                     child: const Text('Denegar'),
                   ),
-                  SizedBox(height: _size.height * 0.01),
+                  SizedBox(height: size.height * 0.01),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.orangeAccent, 
@@ -572,7 +579,9 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                     onPressed: () async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       String? idapp = prefs.getString("id");
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pop(false);
+                      // ignore: use_build_context_synchronously
                       await showProgressAutorizada(context, idapp!, id);
                     },
                     child: const Text('Autorizar'),
@@ -586,7 +595,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
   }
 
   Future<bool> _motivo(BuildContext context, String idUsuario, String solicitudId) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
@@ -618,7 +627,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                     },
                     child: const Text('Cancelar'),
                   ),
-                  SizedBox(height: _size.height * 0.01),
+                  SizedBox(height: size.height * 0.01),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.orangeAccent, 
@@ -639,7 +648,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
   }
 
   Future<bool> _descripcion(String locatario, String descripcion) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
@@ -649,7 +658,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
             actions: <Widget>[
-              SizedBox(height: _size.height * 0.02),
+              SizedBox(height: size.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -811,7 +820,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
         }else if(fin == "null"){
           now = inicio;
         }else{
-          now = inicio+"al "+fin;
+          now = "${inicio}al $fin";
         }
         _dialogCalendarPickerValue = values;
         //_getExcel(inicio, fin);
@@ -983,7 +992,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
       final response = await http.post(Uri(
         scheme: https,
         host: host,
-        path: '/solicitud/app/cambioStatus/'+solicitudId,
+        path: "/solicitud/app/cambioStatus/$solicitudId",
       ), 
       body: data
       );
@@ -1016,6 +1025,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     log(result);
 
     EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
     showResultDialog(context, result);
   }
 
@@ -1030,7 +1040,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
       final response = await http.post(Uri(
         scheme: https,
         host: host,
-        path: '/solicitud/app/cambioStatus/'+solicitudId,
+        path: "/solicitud/app/cambioStatus/$solicitudId",
       ), 
       body: data
       );
@@ -1063,6 +1073,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     log(result);
 
     EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
     showResultDialog(context, result);
   }
 

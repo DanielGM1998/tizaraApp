@@ -98,7 +98,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
           ),
         );
       }else if(inicio == "null"){
@@ -107,7 +107,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
           ),
         );
       }else if(fin == "null"){
@@ -116,7 +116,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
           ),
         );
       }else{
@@ -124,7 +124,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/'+inicio+'/'+fin,
+            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
           ),
         );
       }
@@ -274,7 +274,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return FutureBuilder(
       future: getVariables(),
       builder: (context, snapshot) {
@@ -358,7 +358,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                         ),
                       ],
                     ),
-                    leadingWidth: _size.width * 0.28,
+                    leadingWidth: size.width * 0.28,
                   ),
                   resizeToAvoidBottomInset: false,
                   body: Stack(
@@ -377,12 +377,13 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 0.0),
                         child: CustomRefreshIndicator(
+                          // ignore: implicit_call_tearoffs
                           builder: MaterialIndicatorDelegate(
                             builder: (context, controller) {
                               return Icon(
                                 Icons.refresh_outlined,
                                 color: myColor,
-                                size: _size.width * 0.1,
+                                size: size.width * 0.1,
                               );
                             },
                           ),
@@ -401,7 +402,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (!isFirstLoadRunning)
-                                SizedBox(height: _size.height * 0.005),
+                                SizedBox(height: size.height * 0.005),
                               if (!isFirstLoadRunning)
                                 Container(
                                   decoration: BoxDecoration(
@@ -493,21 +494,25 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                                               fontSize: 16,
                                                               fontWeight: FontWeight.bold,
                                                             ),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
                                                             item['local'],
                                                             style: const TextStyle(
                                                                 fontSize: 16),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
-                                                            "Fecha de Ejecución: "+item['fecha_ejecucion'],
+                                                            "Fecha de Ejecución: ${item['fecha_ejecucion']}",
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
                                                           Text(
                                                             item['hora_ejecucion']==""
                                                             ? "Todo el día"
-                                                            : "Hora de Ejecución: "+item['hora_ejecucion'],
+                                                            : "Hora de Ejecución: ${item['hora_ejecucion']}",
                                                             style: const TextStyle(
                                                                 fontSize: 12),
                                                           ),
@@ -516,7 +521,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                                       Align(
                                                         alignment: Alignment.centerRight,
                                                         child: Padding(
-                                                          padding: EdgeInsets.only(right: _size.width * 0.01),
+                                                          padding: EdgeInsets.only(right: size.width * 0.01),
                                                           child: Icon(
                                                             Icons.arrow_forward_ios_outlined,
                                                             size: 24,
@@ -556,7 +561,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
   }
 
   Future<bool> _onWillPop(String id, String local, String solicitante) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
@@ -581,7 +586,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                         },
                         child: const Text('Entrada'),
                       ),
-                      SizedBox(height: _size.height * 0.01),
+                      SizedBox(height: size.height * 0.01),
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.blueAccent, 
@@ -603,14 +608,14 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
   }
 
   Future<bool> _onWillPop2(String id, String local, String solicitante) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: false,
           context: context,
           builder: (context) => StatefulBuilder(
             builder: (context, setStateDialog) =>
             AlertDialog(
-              title: Text("¿Registrar Entrada de "+local+"?", textAlign: TextAlign.center),
+              title: Text("¿Registrar Entrada de $local?", textAlign: TextAlign.center),
               content: SizedBox(
                 width: double.maxFinite,
                 child: SingleChildScrollView(
@@ -618,7 +623,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       TextField(
                         controller: _comentarioController,
                         maxLines: 2, 
@@ -627,13 +632,13 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                           border: OutlineInputBorder(), 
                         ),
                       ),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       _pickedImage == null
                       ? const SizedBox.shrink()
                       : Column(
                           children: [
                             Container(
-                              height: _size.height * 0.3,
+                              height: size.height * 0.3,
                               decoration: BoxDecoration(
                                   color: myColor,
                                   image: DecorationImage(
@@ -661,10 +666,17 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                   color: Colors.black12,
                                   child: ImageSlideshow(
                                     width: double.infinity,
-                                    height: _size.height * 0.2,
+                                    height: size.height * 0.2,
                                     initialPage: 0,
                                     indicatorColor: Colors.blueAccent,
                                     indicatorBackgroundColor: Colors.white,
+                                    onPageChanged: (value) {},
+                                    autoPlayInterval: 0,
+                                    isLoop: false,
+                                    indicatorRadius: 5,
+                                    indicatorPadding: 7,
+                                    disableUserScrolling: false,
+                                    indicatorBottomPadding: 10,
                                     children: [
                                       for (String image in imagePaths)
                                         Stack(
@@ -674,7 +686,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                               padding: const EdgeInsets.only(top: 0),
                                               child: SizedBox(
                                                 width: double.infinity,
-                                                height: _size.height * 0.4,
+                                                height: size.height * 0.4,
                                                 child: Image.file(
                                                   File(image),
                                                   fit: BoxFit.contain,
@@ -691,27 +703,20 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                           ],
                                         ),
                                     ],
-                                    onPageChanged: (value) {},
-                                    autoPlayInterval: 0,
-                                    isLoop: false,
-                                    indicatorRadius: 5,
-                                    indicatorPadding: 7,
-                                    disableUserScrolling: false,
-                                    indicatorBottomPadding: 10,
                                   ),
                                 ),
                             ],
                           ),
                         ],
                       ),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       GestureDetector(
                         onTap: () async {
                           handleMultipleImagesFromCamera(setStateDialog);
                         },
                         child: Container(
-                          height: _size.height * 0.07,
-                          width: _size.height * 0.07,
+                          height: size.height * 0.07,
+                          width: size.height * 0.07,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.white,
@@ -722,7 +727,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                           ),
                           child: Icon(
                             Icons.camera_alt,
-                            size: _size.height * 0.05,
+                            size: size.height * 0.05,
                             color: Colors.blueAccent,
                           ),
                         ),
@@ -734,7 +739,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0))),
               actions: <Widget>[
-                SizedBox(height: _size.height * 0.02),
+                SizedBox(height: size.height * 0.02),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -770,14 +775,14 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
   }
 
   Future<bool> _onWillPop3(String id, String local, String solicitante) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: false,
           context: context,
           builder: (context) => StatefulBuilder(
             builder: (context, setStateDialog) =>
             AlertDialog(
-              title: Text("¿Registrar Salida de "+local+"?", textAlign: TextAlign.center),
+              title: Text("¿Registrar Salida de $local?", textAlign: TextAlign.center),
               content: SizedBox(
                 width: double.maxFinite,
                 child: SingleChildScrollView(
@@ -785,7 +790,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       TextField(
                         controller: _comentarioController,
                         maxLines: 2, 
@@ -794,13 +799,13 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                           border: OutlineInputBorder(), 
                         ),
                       ),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       _pickedImage == null
                       ? const SizedBox.shrink()
                       : Column(
                           children: [
                             Container(
-                              height: _size.height * 0.3,
+                              height: size.height * 0.3,
                               decoration: BoxDecoration(
                                   color: myColor,
                                   image: DecorationImage(
@@ -828,10 +833,17 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                   color: Colors.black12,
                                   child: ImageSlideshow(
                                     width: double.infinity,
-                                    height: _size.height * 0.2,
+                                    height: size.height * 0.2,
                                     initialPage: 0,
                                     indicatorColor: Colors.blueAccent,
                                     indicatorBackgroundColor: Colors.white,
+                                    onPageChanged: (value) {},
+                                    autoPlayInterval: 0,
+                                    isLoop: false,
+                                    indicatorRadius: 5,
+                                    indicatorPadding: 7,
+                                    disableUserScrolling: false,
+                                    indicatorBottomPadding: 10,
                                     children: [
                                       for (String image in imagePaths)
                                         Stack(
@@ -841,7 +853,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                               padding: const EdgeInsets.only(top: 0),
                                               child: SizedBox(
                                                 width: double.infinity,
-                                                height: _size.height * 0.4,
+                                                height: size.height * 0.4,
                                                 child: Image.file(
                                                   File(image),
                                                   fit: BoxFit.contain,
@@ -858,27 +870,20 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                           ],
                                         ),
                                     ],
-                                    onPageChanged: (value) {},
-                                    autoPlayInterval: 0,
-                                    isLoop: false,
-                                    indicatorRadius: 5,
-                                    indicatorPadding: 7,
-                                    disableUserScrolling: false,
-                                    indicatorBottomPadding: 10,
                                   ),
                                 ),
                             ],
                           ),
                         ],
                       ),
-                      SizedBox(height: _size.height * 0.02),
+                      SizedBox(height: size.height * 0.02),
                       GestureDetector(
                         onTap: () async {
                           handleMultipleImagesFromCamera(setStateDialog);
                         },
                         child: Container(
-                          height: _size.height * 0.07,
-                          width: _size.height * 0.07,
+                          height: size.height * 0.07,
+                          width: size.height * 0.07,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.white,
@@ -889,7 +894,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                           ),
                           child: Icon(
                             Icons.camera_alt,
-                            size: _size.height * 0.05,
+                            size: size.height * 0.05,
                             color: Colors.blueAccent,
                           ),
                         ),
@@ -901,7 +906,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0))),
               actions: <Widget>[
-                SizedBox(height: _size.height * 0.02),
+                SizedBox(height: size.height * 0.02),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -937,7 +942,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
   }
 
   Future<bool> _descripcion(String locatario, String descripcion) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
@@ -947,7 +952,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
             actions: <Widget>[
-              SizedBox(height: _size.height * 0.02),
+              SizedBox(height: size.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -1116,7 +1121,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
         }else if(fin == "null"){
           now = inicio;
         }else{
-          now = inicio+"al "+fin;
+          now = "${inicio}al $fin";
         }
         _dialogCalendarPickerValue = values;
         //_getExcel(inicio, fin);
@@ -1369,7 +1374,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       final response = await http.post(Uri(
         scheme: https,
         host: host,
-        path: '/solicitud_bitacora/app/addEntrada/'+solicitudId,
+        path: "/solicitud_bitacora/app/addEntrada/$solicitudId",
       ), 
       body: data
       );
@@ -1443,6 +1448,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
     //log(result);
 
     EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
     showResultDialog(context, result);
   }
 
@@ -1457,7 +1463,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       final response = await http.post(Uri(
         scheme: https,
         host: host,
-        path: '/solicitud_bitacora/app/editSalida/'+solicitudId,
+        path: "/solicitud_bitacora/app/editSalida/$solicitudId",
       ), 
       body: data
       );
@@ -1533,6 +1539,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
     //log(result);
 
     EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
     showResultDialog(context, result);
   }
 

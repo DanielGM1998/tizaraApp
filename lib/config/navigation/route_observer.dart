@@ -13,10 +13,10 @@ class RouteAwareWidget extends StatefulWidget {
   const RouteAwareWidget({Key? key, required this.child, required this.screenName}) : super(key: key);
 
   @override
-  _RouteAwareWidgetState createState() => _RouteAwareWidgetState();
+  RouteAwareWidgetState createState() => RouteAwareWidgetState();
 }
 
-class _RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

@@ -16,6 +16,7 @@ import 'package:tizara/presentation/screens/login/login_screen.dart';
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
 import 'package:tizara/presentation/screens/proveedor/proveedor_screen.dart';
 import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
+import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locatarios_screen.dart';
 import 'package:tizara/presentation/screens/splash/splash_screen.dart';
 
 import 'config/theme/app_theme.dart';
@@ -136,6 +137,7 @@ class _MyAppState extends State<MyApp> {
         ProveedorScreen.routeName: (context) => const ProveedorScreen(idapp: ""),
         AutorizadasScreen.routeName: (context) => const AutorizadasScreen(idapp: ""),
         SolicitudesScreen.routeName: (context) => const SolicitudesScreen(idapp: ""),
+        SolicitudLocatariosScreen.routeName: (context) => const SolicitudLocatariosScreen(idapp: ""),
       },
     );
   }

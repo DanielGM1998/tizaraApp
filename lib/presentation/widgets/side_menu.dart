@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tizara/constants/constants.dart';
 import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
+import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locatarios_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/proveedor/proveedor_screen.dart';
 
@@ -38,7 +39,7 @@ class _SideMenuState extends State<SideMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
 
     return NavigationDrawer(
       backgroundColor: Colors.white,
@@ -46,52 +47,129 @@ class _SideMenuState extends State<SideMenu> {
       onDestinationSelected: (value) {
         setState(() {
           navDrawerIndex = value;
-          switch (navDrawerIndex) {
-            case 0:
-              Navigator.of(context).pushReplacementNamed(
-                HomeScreen.routeName,
-                arguments: widget.idapp,
-              );
-              // Navigator.of(context).pushReplacement(
-              //   _buildPageRoute(const HomeScreen()),
-              // );
-              break;
-            case 1:
-              Navigator.of(context).pushReplacementNamed(
-                ProveedorScreen.routeName,
-                arguments: widget.idapp,
-              );
-              // Navigator.of(context).pushReplacement(
-              //   _buildPageRoute(ProveedorScreen(idapp: widget.idapp)),
-              // );
-              break;
-            case 2:
-              Navigator.of(context).pushReplacementNamed(
-                AutorizadasScreen.routeName,
-                arguments: widget.idapp,
-              );
-              // Navigator.of(context).pushReplacement(
-              //   _buildPageRoute(AutorizadasScreen(idapp: widget.idapp)),
-              // );
-              break;
-            case 3:
-              Navigator.of(context).pushReplacementNamed(
-                SolicitudesScreen.routeName,
-                arguments: widget.idapp,
-              );
-              // Navigator.of(context).pushReplacement(
-              //   _buildPageRoute(PendientesScreen(idapp: widget.idapp)),
-              // );
-              break;
-            default:
-              Navigator.of(context).pushReplacementNamed(
-                HomeScreen.routeName,
-                arguments: widget.idapp,
-              );
-              // Navigator.of(context).pushReplacement(
-              //   _buildPageRoute(const HomeScreen()),
-              // );
-              break;
+          if(widget.tipoapp=="1"){
+            switch (navDrawerIndex) {
+              case 0:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(const HomeScreen()),
+                // );
+                break;
+              case 1:
+                Navigator.of(context).pushReplacementNamed(
+                  ProveedorScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(ProveedorScreen(idapp: widget.idapp)),
+                // );
+                break;
+              case 2:
+                Navigator.of(context).pushReplacementNamed(
+                  AutorizadasScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(AutorizadasScreen(idapp: widget.idapp)),
+                // );
+                break;
+              case 3:
+                Navigator.of(context).pushReplacementNamed(
+                  SolicitudesScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(PendientesScreen(idapp: widget.idapp)),
+                // );
+                break;
+              default:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(const HomeScreen()),
+                // );
+                break;
+            }
+          }else if(widget.tipoapp=="2"){
+            switch (navDrawerIndex) {
+              case 0:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(const HomeScreen()),
+                // );
+                break;
+              case 1:
+                Navigator.of(context).pushReplacementNamed(
+                  SolicitudLocatariosScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(SolicitudLocatariosScreen(idapp: widget.idapp)),
+                // );
+                break;
+              default:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(const HomeScreen()),
+                // );
+                break;
+            }
+          }else if(widget.tipoapp=="3"){
+            switch (navDrawerIndex) {
+              case 0:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(const HomeScreen()),
+                // );
+                break;
+              case 1:
+                Navigator.of(context).pushReplacementNamed(
+                  ProveedorScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(ProveedorScreen(idapp: widget.idapp)),
+                // );
+                break;
+              case 2:
+                Navigator.of(context).pushReplacementNamed(
+                  AutorizadasScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(AutorizadasScreen(idapp: widget.idapp)),
+                // );
+                break;
+            }
+          }else{
+            switch (navDrawerIndex) {
+              case 0:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                break;
+              default:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                break;
+            }
           }
         });
       },
@@ -118,11 +196,11 @@ class _SideMenuState extends State<SideMenu> {
                     Center(
                       child: Image.asset(
                         myLogo,
-                        height: _size.height * 0.08,
-                        width: _size.width * 0.5,
+                        height: size.height * 0.08,
+                        width: size.width * 0.5,
                       ),
                     ),
-                    SizedBox(height: _size.width * 0.015),
+                    SizedBox(height: size.width * 0.015),
                     Text(widget.userapp,
                         style: const TextStyle(
                             color:myColor, fontSize: 18, fontWeight: FontWeight.bold)),
@@ -152,6 +230,7 @@ class _SideMenuState extends State<SideMenu> {
             icon: Icon(Icons.people_sharp, color: myColor),
             label: Text("Proveedor", style: TextStyle(color: myColor)),
           ),
+        if(widget.tipoapp=="1" || widget.tipoapp=="3")
           const Divider(
             height: 1,
             thickness: 0.1,
@@ -165,6 +244,7 @@ class _SideMenuState extends State<SideMenu> {
             icon: Icon(Icons.list_alt, color: myColor),
             label: Text("Sol. Autorizadas", style: TextStyle(color: myColor)),
           ),
+        if(widget.tipoapp=="1" || widget.tipoapp=="3")
           const Divider(
             height: 1,
             thickness: 0.1,
@@ -178,6 +258,21 @@ class _SideMenuState extends State<SideMenu> {
             icon: Icon(Icons.list_alt, color: myColor),
             label: Text("Solicitudes", style: TextStyle(color: myColor)),
           ),
+        if(widget.tipoapp=="1")
+          const Divider(
+            height: 1,
+            thickness: 0.1,
+            indent: 20,
+            endIndent: 20,
+            color: myColor,
+          ),
+        
+        if(widget.tipoapp=="2")
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.list_alt, color: myColor),
+            label: Text("Mis Solicitudes", style: TextStyle(color: myColor)),
+          ),
+        if(widget.tipoapp=="2")
           const Divider(
             height: 1,
             thickness: 0.1,

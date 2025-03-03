@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -57,6 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         bool value = await _onWillPop();
         if (value) {
+          // ignore: use_build_context_synchronously
           Navigator.of(context).pop(value);
         }
       },
@@ -87,9 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(
                           height: 120,
                         ),
-                        Image.asset(myLogo, width: _size.width * 0.50),
+                        Image.asset(myLogo, width: size.width * 0.50),
                         SizedBox(
-                          height: _size.height * 0.12,
+                          height: size.height * 0.12,
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -106,12 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 textAlign: TextAlign.left,
                               ),
                             ),
-                            SizedBox(height: _size.height * 0.02),
+                            SizedBox(height: size.height * 0.02),
                             //////
                             Column(
                               children: <Widget>[
                                 SizedBox(
-                                  height: _size.height * 0.012,
+                                  height: size.height * 0.012,
                                 ),
                                 Theme(
                                   data: Theme.of(context).copyWith(
@@ -153,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 SizedBox(
-                                  height: _size.height * 0.012,
+                                  height: size.height * 0.012,
                                 ),
                                 Theme(
                                   data: Theme.of(context).copyWith(
@@ -277,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 SizedBox(
-                                  height: _size.height * 0.02,
+                                  height: size.height * 0.02,
                                 ),
                               ],
                             ),
@@ -336,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Container(
                                 color: Colors.transparent,
-                                height: _size.height * 0.10),
+                                height: size.height * 0.10),
                           ],
                         ),
                       ],
@@ -399,18 +400,7 @@ Future<String> _check(tel_email, pass) async {
       //print(jsonData['result']['nombre']);
       if (jsonData['response'] == true) {
         //return 'Datos Correctos,';
-        return 'Datos Correctos,' +
-            jsonData['result']['id'] +
-            "," +
-            jsonData['result']['nombre'] +
-            "," +
-            jsonData['result']['apellidos'] +
-            "," +
-            jsonData['result']['telefono'] +
-            "," +
-            jsonData['result']['email'] +
-            "," +
-            jsonData['result']['usuario_tipo_id'];
+        return "Datos Correctos,${jsonData['result']['id']},${jsonData['result']['nombre']},${jsonData['result']['apellidos']},${jsonData['result']['telefono']},${jsonData['result']['email']},${jsonData['result']['usuario_tipo_id']}";
       } else {
         return 'Verifique sus datos';
       }
@@ -427,6 +417,7 @@ showProgress(BuildContext context, String telEmail, String pass) async {
     context: context,
     builder: (context) => FutureProgressDialog(_check(telEmail, pass)),
   );
+  // ignore: use_build_context_synchronously
   showResultDialog(context, result, telEmail, pass);
 }
 
@@ -468,11 +459,12 @@ Future<void> showResultDialog(
   } else if (splitted[0] == 'Datos Correctos') {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('id', splitted[1]);
-    prefs.setString('nombre', splitted[2] + " " + splitted[3]);
+    prefs.setString('nombre', "${splitted[2]} ${splitted[3]}");
     prefs.setString('telefono', splitted[4]);
     prefs.setString('email', splitted[5]);
     prefs.setString('usuario_tipo_id', splitted[6]);
     prefs.setString('pass', pass);
+    // ignore: use_build_context_synchronously
     Navigator.of(context).push(
       PageRouteBuilder(
         barrierColor: Colors.black.withOpacity(0.6),

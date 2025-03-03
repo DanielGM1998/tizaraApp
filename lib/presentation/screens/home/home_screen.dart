@@ -13,6 +13,7 @@ import 'package:tizara/main.dart';
 import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
+import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locatarios_screen.dart';
 
 import '../../widgets/my_app_bar.dart';
 import '../../widgets/side_menu.dart';
@@ -181,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     //  log("Pantalla actual: $currentScreen");
     return FutureBuilder(
       future: getVariables(),
@@ -195,6 +196,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ];
           }else if(_tipoapp =="2"){
             modulos = [
+              {'nombre': 'Mis Solicitudes', 'icono': Icons.list_alt, 'color': Colors.grey, 'ruta': (String id) => SolicitudLocatariosScreen(idapp: id)},
             ];
           }else if(_tipoapp =="3"){
             modulos = [
@@ -211,6 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               if (didPop) { return; }
               bool value = await _onWillPop();
               if (value) {
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pop(value);
               }
             },
@@ -231,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: _size.width*0.02),
+                    padding: EdgeInsets.symmetric(vertical: size.width*0.02),
                     child: Column(
                       children: [
                         InkWell(
@@ -241,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 child: BackdropFilter(
                                   filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                                   child: Container(
-                                    height: _size.height*0.10,
+                                    height: size.height*0.10,
                                     margin: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
                                       color: Colors.white24.withOpacity(0.3),
@@ -256,14 +259,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: _size.width * 0.05),
+                                      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                                       child: Column(
                                         children: [
                                           Row(
                                             children: [
                                               Expanded(
                                                 child: Text(
-                                                  "Hola " + _userapp!,
+                                                  "Hola ${_userapp!}",
                                                   style: const TextStyle(
                                                     fontSize: 20,
                                                     color: myColor,
@@ -325,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                           child: BackdropFilter(
                                             filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                                             child: Container(
-                                              height: _size.height*0.12,
+                                              height: size.height*0.12,
                                               margin: const EdgeInsets.all(15),
                                               decoration: BoxDecoration(
                                                 color: Colors.black.withOpacity(0.05),
@@ -337,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                         Positioned.fill(
                                           child: Row(
                                             children: [
-                                              SizedBox(width: _size.width*0.1),
+                                              SizedBox(width: size.width*0.1),
                                               Container(
                                                 padding: const EdgeInsets.all(12.0),
                                                 decoration: BoxDecoration(
@@ -350,7 +353,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                                   color: Colors.white,
                                                 ),
                                               ),
-                                              SizedBox(width: _size.width*0.05),
+                                              SizedBox(width: size.width*0.05),
                                               Text(
                                                 modulos[index]['nombre'],
                                                 style: const TextStyle(

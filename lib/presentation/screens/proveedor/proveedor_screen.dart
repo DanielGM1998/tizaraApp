@@ -288,7 +288,7 @@ class _ProveedorScreenState extends State<ProveedorScreen>
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return FutureBuilder(
       future: getVariables(),
       builder: (context, snapshot) {
@@ -372,7 +372,7 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                         ),
                       ],
                     ),
-                    leadingWidth: _size.width * 0.28,
+                    leadingWidth: size.width * 0.28,
                   ),
                   resizeToAvoidBottomInset: false,
                   body: Stack(
@@ -391,12 +391,13 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 0.0),
                         child: CustomRefreshIndicator(
+                          // ignore: implicit_call_tearoffs
                           builder: MaterialIndicatorDelegate(
                             builder: (context, controller) {
                               return Icon(
                                 Icons.refresh_outlined,
                                 color: myColor,
-                                size: _size.width * 0.1,
+                                size: size.width * 0.1,
                               );
                             },
                           ),
@@ -480,11 +481,15 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                                                               fontSize: 16,
                                                               fontWeight: FontWeight.bold,
                                                             ),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
                                                             item['nombre_contacto'],
                                                             style: const TextStyle(
                                                                 fontSize: 16),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                           Text(
                                                             item['telefono'] == ""
@@ -499,13 +504,15 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                                                                 : item['correo'],
                                                             style: const TextStyle(
                                                                 fontSize: 12),
+                                                            overflow: TextOverflow.ellipsis, 
+                                                            maxLines: 1,
                                                           ),
                                                         ],
                                                       ),
                                                       Align(
                                                         alignment: Alignment.centerRight,
                                                         child: Padding(
-                                                          padding: EdgeInsets.only(right: _size.width * 0.01),
+                                                          padding: EdgeInsets.only(right: size.width * 0.01),
                                                           child: const Icon(
                                                             Icons.arrow_forward_ios_outlined,
                                                             size: 24,
@@ -541,7 +548,7 @@ class _ProveedorScreenState extends State<ProveedorScreen>
   }
 
   Future<bool> _onWillPop(String id, String servicio, String nombre) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
@@ -566,7 +573,7 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                         },
                         child: const Text('Entrada'),
                       ),
-                      SizedBox(height: _size.height * 0.01),
+                      SizedBox(height: size.height * 0.01),
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.blueAccent, 
@@ -588,17 +595,17 @@ class _ProveedorScreenState extends State<ProveedorScreen>
   }
 
   Future<bool> _onWillPop2(String id, String servicio, String nombre) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text("¿Registrar Entrada de "+servicio+"?", textAlign: TextAlign.center),
+            title: Text("¿Registrar Entrada de $servicio?", textAlign: TextAlign.center),
             content: Text(nombre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
             actions: <Widget>[
-              SizedBox(height: _size.height * 0.02),
+              SizedBox(height: size.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -625,17 +632,17 @@ class _ProveedorScreenState extends State<ProveedorScreen>
   }
 
   Future<bool> _onWillPop3(String id, String servicio, String nombre) async {
-    final Size _size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text("¿Registrar Salida de "+servicio+"?", textAlign: TextAlign.center),
+            title: Text("¿Registrar Salida de $servicio?", textAlign: TextAlign.center),
             content: Text(nombre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
             actions: <Widget>[
-              SizedBox(height: _size.height * 0.02),
+              SizedBox(height: size.height * 0.02),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -716,6 +723,7 @@ showProgressEntrada(BuildContext context, String idUsuario, String proveedorId) 
     context: context,
     builder: (context) => FutureProgressDialog(_entrada(idUsuario, proveedorId)),
   );
+  // ignore: use_build_context_synchronously
   showResultDialogEntrada(context, result);
 }
 
@@ -844,6 +852,7 @@ showProgressSalida(BuildContext context, String idUsuario, String proveedorId) a
     context: context,
     builder: (context) => FutureProgressDialog(_salida(idUsuario, proveedorId)),
   );
+  // ignore: use_build_context_synchronously
   showResultDialogSalida(context, result);
 }
 
