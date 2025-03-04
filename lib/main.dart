@@ -20,6 +20,7 @@ import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locat
 import 'package:tizara/presentation/screens/splash/splash_screen.dart';
 
 import 'config/theme/app_theme.dart';
+import 'presentation/screens/solicitud_locatarios/crear_solicitud_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -138,6 +139,7 @@ class _MyAppState extends State<MyApp> {
         AutorizadasScreen.routeName: (context) => const AutorizadasScreen(idapp: ""),
         SolicitudesScreen.routeName: (context) => const SolicitudesScreen(idapp: ""),
         SolicitudLocatariosScreen.routeName: (context) => const SolicitudLocatariosScreen(idapp: ""),
+        CrearSolicitudScreen.routeName: (context) => const CrearSolicitudScreen(idapp: ""),
       },
     );
   }

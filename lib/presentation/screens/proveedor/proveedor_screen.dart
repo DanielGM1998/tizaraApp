@@ -340,6 +340,14 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                     shadowColor: myColor,
                     backgroundColor: Colors.white,
                     actions: [
+                      isSearching
+                      ? const Text("")
+                      : IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: (){
+                          fistLoad();
+                        },
+                      ),
                       IconButton(
                         icon: Icon(isSearching ? Icons.close : Icons.search),
                         onPressed: toggleSearch,
@@ -513,10 +521,12 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                                                         alignment: Alignment.centerRight,
                                                         child: Padding(
                                                           padding: EdgeInsets.only(right: size.width * 0.01),
-                                                          child: const Icon(
+                                                          child: Icon(
                                                             Icons.arrow_forward_ios_outlined,
                                                             size: 24,
-                                                            color: Colors.green
+                                                            color: _tipoapp == "3"
+                                                            ? Colors.green
+                                                            : Colors.grey
                                                           ),
                                                         ),
                                                       ),

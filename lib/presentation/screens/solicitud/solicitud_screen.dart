@@ -297,6 +297,14 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                     shadowColor: myColor,
                     backgroundColor: Colors.white,
                     actions: [
+                      isSearching
+                      ? const Text("")
+                      : IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: (){
+                            fistLoad();
+                          },
+                        ),
                       IconButton(
                         icon: Icon(isSearching ? Icons.close : Icons.search),
                         onPressed: toggleSearch,
@@ -451,55 +459,57 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(
-                                                            item['solicitante'],
-                                                            style: const TextStyle(
-                                                              fontSize: 16,
-                                                              fontWeight: FontWeight.bold,
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              item['solicitante'],
+                                                              style: const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                              overflow: TextOverflow.ellipsis, 
+                                                              maxLines: 1,
                                                             ),
-                                                            overflow: TextOverflow.ellipsis, 
-                                                            maxLines: 1,
-                                                          ),
-                                                          Text(
-                                                            item['local'],
-                                                            style: const TextStyle(
-                                                                fontSize: 16),
-                                                            overflow: TextOverflow.ellipsis, 
-                                                            maxLines: 1,
-                                                          ),
-                                                          Text(
-                                                            "Fecha solicitud: ${item['fecha_solicita']}",
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                          ),
-                                                          Text(
-                                                            item['status'] == "0"
-                                                            ? "CANCELADA"
-                                                            : item['status'] == "1"
-                                                              ? "AUTORIZADA"
-                                                              : "PENDIENTE",
-                                                            style: const TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight: FontWeight.bold
+                                                            Text(
+                                                              item['local'],
+                                                              style: const TextStyle(
+                                                                  fontSize: 16),
+                                                              overflow: TextOverflow.ellipsis, 
+                                                              maxLines: 1,
                                                             ),
-                                                          ),
-                                                          Text(
-                                                            "Fecha de Ejecución: ${item['fecha_ejecucion']}",
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                          ),
-                                                          Text(
-                                                            item['hora_ejecucion']==""
-                                                            ? "Todo el día"
-                                                            : "Hora de Ejecución: ${item['hora_ejecucion']}",
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                          ),
-                                                        ],
+                                                            Text(
+                                                              "Fecha solicitud: ${item['fecha_solicita']}",
+                                                              style: const TextStyle(
+                                                                  fontSize: 12),
+                                                            ),
+                                                            Text(
+                                                              item['status'] == "0"
+                                                              ? "CANCELADA"
+                                                              : item['status'] == "1"
+                                                                ? "AUTORIZADA"
+                                                                : "PENDIENTE",
+                                                              style: const TextStyle(
+                                                                fontSize: 13,
+                                                                fontWeight: FontWeight.bold
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              "Fecha de Ejecución: ${item['fecha_ejecucion']}",
+                                                              style: const TextStyle(
+                                                                  fontSize: 12),
+                                                            ),
+                                                            Text(
+                                                              item['hora_ejecucion']==""
+                                                              ? "Todo el día"
+                                                              : "Hora de Ejecución: ${item['hora_ejecucion']}",
+                                                              style: const TextStyle(
+                                                                  fontSize: 12),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                       Align(
                                                         alignment: Alignment.centerRight,

@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/main.dart';
+import 'package:tizara/presentation/screens/solicitud_locatarios/crear_solicitud_screen.dart';
 import '../../../constants/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart' as img;
@@ -300,12 +301,17 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
         ),
       );
 
+      //log(response.body);
+
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
-        List<dynamic> resultList = data["result"];
-        setState(() {
-          options = resultList;
-        });
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fetchOptions', response.body); 
+
+        // Map<String, dynamic> data = json.decode(response.body);
+        // List<dynamic> resultList = data["result"];
+        // setState(() {
+        //   options = resultList;
+        // });
       } else {
         if (kDebugMode) {
           print("Error en la respuesta: ${response.statusCode}");
@@ -327,14 +333,17 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
           path: '/solicitud/getLayouts/',
         ),
       );
-      // log(response.body);
-      // log(response.statusCode.toString());
+      //log(response.body);
+
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
-        List<dynamic> resultList2 = data["result"];
-        setState(() {
-          options2 = resultList2;
-        });
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fetchOptions2', response.body); 
+
+        // Map<String, dynamic> data = json.decode(response.body);
+        // List<dynamic> resultList2 = data["result"];
+        // setState(() {
+        //   options2 = resultList2;
+        // });
       } else {
         if (kDebugMode) {
           print("Error en la respuesta: ${response.statusCode}");
@@ -381,13 +390,13 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
     super.initState();
     fistLoad();
     controller = ScrollController()..addListener(loadMore);
+    _fetchOptions(widget.idapp);
+    _fetchOptions2();
   }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    _fetchOptions(widget.idapp);
-    _fetchOptions2();
     return FutureBuilder(
       future: getVariables(),
       builder: (context, snapshot) {
@@ -422,7 +431,7 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
                             controller: searchController,
                             autofocus: true,
                             onChanged: filterItems,
-                            style: const TextStyle(color: Colors.black, fontSize: 11),
+                            style: const TextStyle(color: Colors.black, fontSize: 12),
                             decoration: const InputDecoration(
                               hintText: "Buscar Nombre o Fecha Solicitud",
                               hintStyle: TextStyle(color: Colors.black),
@@ -434,6 +443,14 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
                     shadowColor: myColor,
                     backgroundColor: Colors.white,
                     actions: [
+                      isSearching
+                      ? const Text("")
+                      : IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: (){
+                            fistLoad();
+                          },
+                        ),
                       IconButton(
                         icon: Icon(isSearching ? Icons.close : Icons.search),
                         onPressed: toggleSearch,
@@ -658,7 +675,12 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
                     backgroundColor: Colors.white,
                     child: const Icon(Icons.add),
                     onPressed: () async{
-                      _onWillPop3(widget.idapp,"Yo","1");
+                      Navigator.of(context).pushReplacementNamed(
+                        CrearSolicitudScreen.routeName,
+                        arguments: widget.idapp,
+                      );
+
+                      // _onWillPop3(widget.idapp,"Yo","1");
                     }
                   ),
                 ),
@@ -675,8 +697,6 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
 
   Future<bool> _onWillPop3(String id, String local, String solicitante) async {
     final Size size = MediaQuery.of(context).size;
-    // await _fetchOptions(id);
-    // await _fetchOptions2();
     return (await showDialog(
           barrierDismissible: false,
           context: context,
@@ -1699,54 +1719,6 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
     } catch (e) {
       return 'Error, verificar conexión a Internet';
     }
-  }
-
-  // Denegación
-  Future<String> _denegacion(idUsuario, solicitudId, motivo) async {
-    try {
-      var data = {
-        "usuario_id" : idUsuario, 
-        "motivo" : motivo
-      };
-
-      final response = await http.post(Uri(
-        scheme: https,
-        host: host,
-        path: "/solicitud/app/cambioStatus/$solicitudId",
-      ), 
-      body: data
-      );
-
-      if (response.statusCode == 200) {
-        String body3 = utf8.decode(response.bodyBytes);
-        var jsonData = jsonDecode(body3);
-        if (jsonData['response'] == true) {
-          return 'Solicitud Denegada exitosamente';
-        } else {
-          return 'Error, verificar conexión a Internet';
-        }
-      } else {
-        return 'Error, verificar conexión a Internet';
-      }
-    } catch (e) {
-      return 'Error, verificar conexión a Internet';
-    }
-  }
-
-  showProgressDenegada(BuildContext context, String idUsuario, String solicitudId, String motivo) async {
-
-    EasyLoading.show(
-      status: 'Denegando...',
-      dismissOnTap: false,
-      maskType: EasyLoadingMaskType.clear,
-    );
-
-    var result = await _denegacion(idUsuario, solicitudId, motivo);
-    // log(result);
-
-    EasyLoading.dismiss();
-    // ignore: use_build_context_synchronously
-    showResultDialog(context, result);
   }
 
 }

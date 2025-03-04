@@ -14,6 +14,8 @@ const nameSolicitud = "Solicitudes";
 
 const nameSolicitudLocatarios = "Mis solicitudes";
 
+const nameCrearSolicitud = "Crear solicitud";
+
 const Color myColor = Color.fromRGBO(0, 0, 0, 1);
 
 const Color myColorIntense = Color.fromRGBO(104, 125, 208,1);
