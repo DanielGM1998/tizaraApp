@@ -67,15 +67,18 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
   ];
 
   List<DateTime?> _dialogCalendarPickerValue = [
-    DateTime.now().add(const Duration(days: -15)),
+    DateTime.now().add(const Duration(days: -7)),
     DateTime.now(),
   ];
 
-  String now = "${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -15)))} a ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
+  String now = "${DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -7)))} a ${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
 
   String inicio = "null", fin = "null";
 
   final TextEditingController _comentarioController = TextEditingController();
+
+  // filtro "0" = Cancelada, "1" = Autorizada, "2" = Pendiente
+  String? _selectedStatus; 
 
   // llamada a servidor para solicitudes
   void fistLoad() async {
@@ -85,7 +88,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     try {
       final http.Response response;
       if(inicio == "null" && fin == "null"){
-        inicio = DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -15)));
+        inicio = DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: -7)));
         fin = DateFormat('yyyy-MM-dd').format(DateTime.now());
         response = await http.get(
           Uri(
@@ -206,6 +209,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     setState(() {
       isSearching = !isSearching;
       if (!isSearching) {
+        _selectedStatus = null;
         searchController.clear();
         filteredItems = List.from(items); // Restaura la lista original
       }
@@ -224,22 +228,37 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
         .replaceAll(RegExp(r'[ç]'), 'c');
   }
 
+  // void filterItems(String query) {
+  //   final normalizedQuery = removeDiacritics(query);
+  //   setState(() {
+  //     if (query.isEmpty) {
+  //       filteredItems = List.from(items); // Restaura todos los elementos
+  //     } else {
+  //       filteredItems = items.where((item) {
+  //         final solicitante = removeDiacritics(item['solicitante'] ?? '');
+  //         final local =
+  //             removeDiacritics(item['local'] ?? '');
+  //         return solicitante.contains(normalizedQuery) ||
+  //             local.contains(normalizedQuery);
+  //       }).toList();
+  //     }
+  //   });
+  // }
+
   void filterItems(String query) {
     final normalizedQuery = removeDiacritics(query);
     setState(() {
-      if (query.isEmpty) {
-        filteredItems = List.from(items); // Restaura todos los elementos
-      } else {
-        filteredItems = items.where((item) {
-          final solicitante = removeDiacritics(item['solicitante'] ?? '');
-          final local =
-              removeDiacritics(item['local'] ?? '');
-          return solicitante.contains(normalizedQuery) ||
-              local.contains(normalizedQuery);
-        }).toList();
-      }
+      filteredItems = items.where((item) {
+        final solicitante = removeDiacritics(item['solicitante'] ?? '');
+        final local = removeDiacritics(item['local'] ?? '');
+        final statusMatch = _selectedStatus == null || item['status'] == _selectedStatus;
+        
+        return (solicitante.contains(normalizedQuery) ||
+                local.contains(normalizedQuery)) && statusMatch;
+      }).toList();
     });
   }
+
 
   @override
   void initState() {
@@ -302,6 +321,12 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                       : IconButton(
                         icon: const Icon(Icons.refresh),
                         onPressed: (){
+                            isFirstLoadRunning = false;
+                            hasNextPage = true;
+                            isLoadMoreRunning = false;
+                            items = [];
+                            page = 1;
+                            _selectedStatus = null;
                             fistLoad();
                           },
                         ),
@@ -367,6 +392,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                             isLoadMoreRunning = false;
                             items = [];
                             page = 1;
+                            _selectedStatus = null;
                             fistLoad();
                             controller = ScrollController()..addListener(loadMore);
                             return setState(() {});
@@ -378,24 +404,96 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                               if (!isFirstLoadRunning)
                                 SizedBox(height: size.height * 0.005),
                               if (!isFirstLoadRunning)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.05), 
-                                    borderRadius: BorderRadius.circular(20), 
-                                  ),
-                                  child: IconButton(
-                                    onPressed: () {
-                                      _datePicker();
-                                    },
-                                    icon: Row(
-                                      mainAxisSize: MainAxisSize.min, 
-                                      children: [
-                                        const Icon(Icons.date_range_outlined),
-                                        const SizedBox(width: 8), 
-                                        Text(now),
-                                      ],
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.05), 
+                                        borderRadius: BorderRadius.circular(20), 
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () {
+                                          _datePicker();
+                                        },
+                                        icon: Row(
+                                          mainAxisSize: MainAxisSize.min, 
+                                          children: [
+                                            const Icon(Icons.date_range_outlined),
+                                            const SizedBox(width: 2), 
+                                            Text(now),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: Colors.grey),
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: _selectedStatus,
+                                          hint: const Text("Filtrar", style: TextStyle(fontSize: 10)),
+                                          items: const [
+                                            DropdownMenuItem(
+                                              value: null,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(Icons.format_align_left, size: 18, color: Colors.black),
+                                                  SizedBox(width: 2),
+                                                  Text("Todas", style: TextStyle(fontSize: 12))
+                                                ],
+                                              ),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: "1",
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(Icons.check_circle, size: 18, color: Colors.green),
+                                                  SizedBox(width: 2),
+                                                  Text("Aut.", style: TextStyle(fontSize: 12))
+                                                ],
+                                              ),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: "2",
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(Icons.hourglass_empty, size: 18, color: Colors.orange),
+                                                  SizedBox(width: 2),
+                                                  Text("Pend.", style: TextStyle(fontSize: 12))
+                                                ],
+                                              ),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: "0",
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(Icons.cancel, size: 18, color: Colors.red),
+                                                  SizedBox(width: 2),
+                                                  Text("Canc.", style: TextStyle(fontSize: 12))
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              _selectedStatus = newValue;
+                                              filterItems(searchController.text);
+                                            });
+                                          },
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               if (isFirstLoadRunning)
                                 const Center(
@@ -441,7 +539,12 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                     await _descripcion(item['local'], item['descripcion']);
                                                   },
                                                   child: CircleAvatar(
-                                                    backgroundColor: Colors.orangeAccent,
+                                                    backgroundColor: 
+                                                    item['status'] == "2"
+                                                    ? Colors.orangeAccent
+                                                    : item['status'] == "1"
+                                                      ? Colors.green
+                                                      : Colors.red,
                                                     radius: MediaQuery.of(context)
                                                             .size
                                                             .width *
@@ -491,9 +594,14 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
                                                               : item['status'] == "1"
                                                                 ? "AUTORIZADA"
                                                                 : "PENDIENTE",
-                                                              style: const TextStyle(
+                                                              style: TextStyle(
                                                                 fontSize: 13,
-                                                                fontWeight: FontWeight.bold
+                                                                fontWeight: FontWeight.bold,
+                                                                color: item['status'] == "2"
+                                                                  ? Colors.orangeAccent
+                                                                  : item['status'] == "1"
+                                                                    ? Colors.green
+                                                                    : Colors.red,
                                                               ),
                                                             ),
                                                             Text(
@@ -835,6 +943,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
         _dialogCalendarPickerValue = values;
         //_getExcel(inicio, fin);
       });
+      _selectedStatus = null;
       fistLoad();
     }
   }
