@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloudflare/cloudflare.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,8 +11,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/constants/constants.dart';
+import 'package:tizara/presentation/screens/aviso/aviso_screen.dart';
 import 'package:tizara/presentation/screens/home/home_screen.dart';
 import 'package:tizara/presentation/screens/login/login_screen.dart';
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
@@ -27,6 +31,8 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+String? initialPayload;
 
 // Cloudflare
 late Cloudflare cloudflare;
@@ -47,6 +53,46 @@ void configEasyLoading() {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   // Maneja el mensaje en segundo plano
+  // log('Notificación en segundo plano: ${message.messageId}');
+  // log('${message.notification?.body}');
+  final data = message.data;
+        String? title = data['title'];
+        String? body = data['body'];
+
+        // log(title!);
+        // log(body!);
+
+        if(title=="Nuevo Aviso"){
+        await flutterLocalNotificationsPlugin.show(
+          0,
+          title,
+          body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'your_channel_id', 'your_channel_name',
+              importance: Importance.max,
+              priority: Priority.high,
+              icon: '@mipmap/launcher_icon', 
+              largeIcon: const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'), 
+              color: myColor, 
+              styleInformation: BigTextStyleInformation(
+                message.notification?.body ?? "",
+                contentTitle: message.notification?.title,
+                htmlFormatContent: true,
+                htmlFormatContentTitle: true,
+              ),
+              playSound: true, 
+              ticker: 'ticker',
+              enableVibration: true,
+            ),
+          ),
+          payload: jsonEncode({
+            "tipo": "avisoNotificacion",
+          }), 
+        );
+      }else if(title=="Eliminar Aviso"){
+        await flutterLocalNotificationsPlugin.cancelAll();
+      }
 }
 
 void main() async {
@@ -55,6 +101,43 @@ void main() async {
   await Firebase.initializeApp();
   // Configura el manejador de mensajes en segundo plano
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // inicializar notificaciones locales
+  const InitializationSettings initializationSettings = InitializationSettings( 
+    android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    iOS: DarwinInitializationSettings(),
+  );
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) async{  
+      // log("Notificación interactuada: ${response.payload}");
+      // Si tienes un payload (puedes usarlo para navegar o procesar algo)
+      if (response.payload != null && response.payload!.isNotEmpty) {
+
+        initialPayload = response.payload!;
+
+        final data = jsonDecode(response.payload!);  // convierte el payload a mapa
+        if (data['tipo'] == "avisoNotificacion") {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          int idApp = int.parse(prefs.getString('id') ?? '0');
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => AvisosScreen(idapp: idApp.toString()),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        }        
+      }
+    }
+  );
+
+  final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+  await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+    initialPayload = notificationAppLaunchDetails!.notificationResponse?.payload;
+  }
+
     
   await initializeDateFormatting('es', null); // Inicializa para español
   Intl.defaultLocale = 'es'; // Configura el locale predeterminado
@@ -107,6 +190,28 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (initialPayload != null) {
+        final data = jsonDecode(initialPayload!);
+        if (data['tipo'] == "avisoNotificacion") {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          int idApp = int.parse(prefs.getString('id') ?? '0');
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => AvisosScreen(idapp: idApp.toString()),
+            ),
+            (route) => false,
+          );
+        }
+        initialPayload = null;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -140,6 +245,7 @@ class _MyAppState extends State<MyApp> {
         SolicitudesScreen.routeName: (context) => const SolicitudesScreen(idapp: ""),
         SolicitudLocatariosScreen.routeName: (context) => const SolicitudLocatariosScreen(idapp: ""),
         CrearSolicitudScreen.routeName: (context) => const CrearSolicitudScreen(idapp: ""),
+        AvisosScreen.routeName: (context) => const AvisosScreen(idapp: ""),
       },
     );
   }

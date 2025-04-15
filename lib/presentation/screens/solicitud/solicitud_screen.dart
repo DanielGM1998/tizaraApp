@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
@@ -142,6 +141,8 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
         print('Error al cargar datos');
       }
     }
+
+    if (!mounted) return;
 
     setState(() {
       isFirstLoadRunning = false;
@@ -1141,7 +1142,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     );
 
     var result = await _autorizacion(idUsuario, solicitudId);
-    log(result);
+    // log(result);
 
     EasyLoading.dismiss();
     // ignore: use_build_context_synchronously
@@ -1189,7 +1190,7 @@ class _SolicitudesScreenState extends State<SolicitudesScreen> with SingleTicker
     );
 
     var result = await _denegacion(idUsuario, solicitudId, motivo);
-    log(result);
+    // log(result);
 
     EasyLoading.dismiss();
     // ignore: use_build_context_synchronously

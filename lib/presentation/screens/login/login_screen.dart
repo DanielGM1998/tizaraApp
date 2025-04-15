@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:awesome_top_snackbar/awesome_top_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/presentation/screens/home/home_screen.dart';
 
@@ -31,19 +32,36 @@ class _LoginScreenState extends State<LoginScreen> {
   var textController = TextEditingController();
 
   // Permisos
-  // Future<void> requestPermission() async {
-  //   var status = await Permission.notification.request();
-  //   if (status == PermissionStatus.granted) {
-  //     //print('Permiso otorgado');
-  //   } else {
-  //     //print('Permiso denegado');
-  //   }
-  // }
+  Future<void> requestPermission() async {
+    var status = await Permission.notification.request();
+    if (status == PermissionStatus.granted) {
+      //print('Permiso otorgado');
+    } else {
+      //print('Permiso denegado');
+    }
+
+    // NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+    //   alert: true,
+    //   announcement: false,
+    //   badge: true,
+    //   carPlay: false,
+    //   criticalAlert: false,
+    //   provisional: false,
+    //   sound: true,
+    // );
+
+    // if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    //   // log('Permisos de notificaciones otorgados.');
+    // } else {
+    //   // log('Permisos de notificaciones denegados.');
+    //   return;
+    // }
+  }
 
   @override
   void initState() {
     super.initState();
-    //requestPermission();
+    requestPermission();
   }
 
   @override

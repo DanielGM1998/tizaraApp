@@ -6,12 +6,14 @@ import 'dart:ui';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/constants/constants.dart';
 import 'package:tizara/main.dart';
 import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:tizara/presentation/screens/aviso/aviso_screen.dart';
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
 import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locatarios_screen.dart';
 
@@ -63,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     // Obtener el nuevo token de FCM
     String? newToken = await FirebaseMessaging.instance.getToken();
-
 
     if (newToken != null && newToken != storedToken) {      
       bool success = await _saveToken(_idapp, newToken, _tipoapp);
@@ -137,41 +138,129 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _idapp = prefs.getString("id");
       // Maneja el mensaje cuando la aplicación está en primer plano
-      log("Primer plano");
-      log('${message.notification?.body}');
+      //log("Primer plano");
+      //log('${message.notification?.body}');
 
-      if (currentScreen == AutorizadasScreen.routeName) {
-        navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AutorizadasScreen.routeName,
-          (Route<dynamic> route) => false,
-          arguments: _idapp,
+      final data = message.data;
+      String? title = data['title'];
+      String? body = data['body'];
+      String? tipo = data['tipo'];
+
+      // log(title!);
+      // log(body!);
+      // log(tipo!);
+
+      if(tipo=="avisoNotificacion"){
+        await flutterLocalNotificationsPlugin.show(
+          0,
+          title,
+          body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'your_channel_id', 'your_channel_name',
+              importance: Importance.max,
+              priority: Priority.high,
+              icon: '@mipmap/launcher_icon', 
+              largeIcon: const DrawableResourceAndroidBitmap('@mipmap/launcher_icon'), 
+              color: myColor, 
+              styleInformation: BigTextStyleInformation(
+                message.notification?.body ?? "",
+                contentTitle: message.notification?.title,
+                htmlFormatContent: true,
+                htmlFormatContentTitle: true,
+              ),
+              playSound: true, 
+              ticker: 'ticker',
+              enableVibration: true,
+            ),
+          ),
+          payload: jsonEncode({
+            "tipo": "avisoNotificacion",
+          }), 
         );
-      }else if (currentScreen == SolicitudesScreen.routeName) {
-        navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          SolicitudesScreen.routeName,
-          (Route<dynamic> route) => false,
-          arguments: _idapp,
-        );
-      }else {
-        log("No estamos en SolicitudesScreen o PendientesScreen, pantalla actual: $currentScreen");
+      }else if(tipo=="avisoNotificacionEliminar"){
+        await flutterLocalNotificationsPlugin.cancelAll();
+      }else{
+        if (currentScreen == AutorizadasScreen.routeName) {
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AutorizadasScreen.routeName,
+            (Route<dynamic> route) => false,
+            arguments: _idapp,
+          );
+        }else if (currentScreen == SolicitudesScreen.routeName) {
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            SolicitudesScreen.routeName,
+            (Route<dynamic> route) => false,
+            arguments: _idapp,
+          );
+        }else {
+          //log("No estamos en SolicitudesScreen o PendientesScreen, pantalla actual: $currentScreen");
+        }
       }
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async{
       // Maneja el mensaje cuando la aplicación se abre desde una notificación
-      log("Segundo plano");
-      log('${message.notification?.body}');
+      // log("Segundo plano");
+      // log('${message.notification?.body}');
+
+      final data = message.data;
+      // String? title = data['title'];
+      // String? body = data['body'];
+      String? tipo = data['tipo'];
+
+      // log(title!);
+      // log(body!);
+      // log(tipo!);
+
+      if(tipo=="avisoNotificacion"){
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        int idApp = int.parse(prefs.getString('id') ?? '0');
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => AvisosScreen(idapp: idApp.toString()),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      }else if(tipo=="avisoNotificacionEliminar"){
+        await flutterLocalNotificationsPlugin.cancelAll();
+      }
     });
+
 
     // Verifica si la aplicación fue abierta desde una notificación cuando estaba terminada
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) async{
       if (message != null) {
         // Maneja el mensaje
-        log("Terminada");
-        log('${message.notification?.body}');
+        //log("Terminada");
+        //log('${message.notification?.body}');
+
+        final data = message.data;
+        // String? title = data['title'];
+        // String? body = data['body'];
+        String? tipo = data['tipo'];
+
+        // log(title!);
+        // log(body!);
+        // log(tipo!);
+
+        // Espera al primer frame para que el árbol de widgets esté listo
+        WidgetsBinding.instance.addPostFrameCallback((_) async{
+          if (tipo == 'avisoNotificacion') {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            int idApp = int.parse(prefs.getString('id') ?? '0');
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => AvisosScreen(idapp: idApp.toString()),
+              ),
+              (Route<dynamic> route) => false,
+            );
+          }else if(tipo=="avisoNotificacionEliminar"){
+            await flutterLocalNotificationsPlugin.cancelAll();
+          }
+        });
       }
     });
-
   }
 
   // despues de initState
@@ -202,6 +291,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             modulos = [
               {'nombre': 'Proveedores', 'icono': Icons.people_sharp, 'color': Colors.green, 'ruta':  (String id) => ProveedorScreen(idapp: id)},
               {'nombre': 'Sol. Autorizadas', 'icono': Icons.list_alt, 'color': Colors.blueAccent, 'ruta': (String id) => AutorizadasScreen(idapp: id)},
+              {'nombre': 'Avisos', 'icono': Icons.add_alert_rounded, 'color': Colors.purple, 'ruta': (String id) => AvisosScreen(idapp: id)},
             ];
           }else{
             modulos = [
@@ -221,8 +311,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               screenName: "home",
               child: Scaffold(
                   backgroundColor: Colors.white.withOpacity(1),
-                  appBar: myAppBar(context, nameApp, _idapp!),
-                  drawer: SideMenu(userapp: _userapp!, tipoapp: _tipoapp!, idapp: _idapp!),
+                  appBar: myAppBar(context, nameApp, _idapp ?? "0"),
+                  drawer: SideMenu(userapp: _userapp ?? "0", tipoapp: _tipoapp ?? "0", idapp: _idapp ?? "0"),
                   resizeToAvoidBottomInset: false,
                   body: Container(
                     decoration: BoxDecoration(
@@ -266,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                             children: [
                                               Expanded(
                                                 child: Text(
-                                                  "Hola ${_userapp!}",
+                                                  "Hola ${_userapp ?? ""}",
                                                   style: const TextStyle(
                                                     fontSize: 20,
                                                     color: myColor,
@@ -298,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     onTap: () {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
-                                          builder: (_) => modulos[index]['ruta'](_idapp!),
+                                          builder: (_) => modulos[index]['ruta'](_idapp ?? "0"),
                                         ),
                                       );
                                       // Navigator.of(context).push(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tizara/constants/constants.dart';
 import 'package:tizara/presentation/screens/autorizada/autorizada_screen.dart';
+import 'package:tizara/presentation/screens/aviso/aviso_screen.dart';
 import 'package:tizara/presentation/screens/solicitud/solicitud_screen.dart';
 import 'package:tizara/presentation/screens/solicitud_locatarios/solicitud_locatarios_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -154,6 +155,21 @@ class _SideMenuState extends State<SideMenu> {
                 //   _buildPageRoute(AutorizadasScreen(idapp: widget.idapp)),
                 // );
                 break;
+              case 3:
+                Navigator.of(context).pushReplacementNamed(
+                  AvisosScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                // Navigator.of(context).pushReplacement(
+                //   _buildPageRoute(AutorizadasScreen(idapp: widget.idapp)),
+                // );
+                break;
+              default:
+                Navigator.of(context).pushReplacementNamed(
+                  HomeScreen.routeName,
+                  arguments: widget.idapp,
+                );
+                break;
             }
           }else{
             switch (navDrawerIndex) {
@@ -273,6 +289,20 @@ class _SideMenuState extends State<SideMenu> {
             label: Text("Mis Solicitudes", style: TextStyle(color: myColor)),
           ),
         if(widget.tipoapp=="2")
+          const Divider(
+            height: 1,
+            thickness: 0.1,
+            indent: 20,
+            endIndent: 20,
+            color: myColor,
+          ),
+        
+        if(widget.tipoapp=="3")
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.add_alert_rounded, color: myColor),
+            label: Text("Avisos", style: TextStyle(color: myColor)),
+          ),
+        if(widget.tipoapp=="3")
           const Divider(
             height: 1,
             thickness: 0.1,

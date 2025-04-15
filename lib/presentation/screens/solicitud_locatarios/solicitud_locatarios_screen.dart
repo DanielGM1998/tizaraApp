@@ -172,6 +172,8 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
       }
     }
 
+    if (!mounted) return;
+
     setState(() {
       isFirstLoadRunning = false;
     });
@@ -695,7 +697,7 @@ class _SolicitudLocatariosScreenState extends State<SolicitudLocatariosScreen> w
     
   }
 
-  Future<bool> _onWillPop3(String id, String local, String solicitante) async {
+  Future<bool> onWillPop3(String id, String local, String solicitante) async {
     final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: false,

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:cloudflare/cloudflare.dart';
@@ -9,9 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:image_picker/image_picker.dart' as img;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
@@ -22,21 +19,21 @@ import 'package:http/http.dart' as http;
 import '../../widgets/side_menu.dart';
 import '../home/home_screen.dart';
 
-class AutorizadasScreen extends StatefulWidget {
-  static const String routeName = 'autorizada';
+class AvisosScreen extends StatefulWidget {
+  static const String routeName = 'aviso';
 
   final String idapp;
 
-  const AutorizadasScreen({
+  const AvisosScreen({
     Key? key,
     required this.idapp,
   }) : super(key: key);
 
   @override
-  State<AutorizadasScreen> createState() => _AutorizadasScreenState();
+  State<AvisosScreen> createState() => _AvisosScreenState();
 }
 
-class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTickerProviderStateMixin {
+class _AvisosScreenState extends State<AvisosScreen> with SingleTickerProviderStateMixin {
   String? _tipoapp;
   String? _userapp;
 
@@ -78,12 +75,6 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
 
   String inicio = "null", fin = "null";
 
-  final TextEditingController _comentarioController = TextEditingController();
-
-  File? _pickedImage;
-  //bool _loading = false;
-  List<String> imagePaths = [];
-
   // llamada a servidor para solicitudes
   void fistLoad() async {
     setState(() {
@@ -98,7 +89,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
+            path: '/aviso/app/getAllAvisos/$inicio/$fin',
           ),
         );
       }else if(inicio == "null"){
@@ -107,7 +98,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
+            path: '/aviso/app/getAllAvisos/$inicio/$fin',
           ),
         );
       }else if(fin == "null"){
@@ -116,7 +107,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
+            path: '/aviso/app/getAllAvisos/$inicio/$fin',
           ),
         );
       }else{
@@ -124,11 +115,11 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
           Uri(
             scheme: https,
             host: host,
-            path: '/solicitud/app/getAutorizadas/$inicio/$fin',
+            path: '/aviso/app/getAllAvisos/$inicio/$fin',
           ),
         );
       }
-      //log('/solicitud/app/getAutorizadas/'+inicio+'/'+fin);
+      // log('/aviso/app/getAllAvisos/$inicio/$fin');
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -171,7 +162,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
     //       Uri(
     //         scheme: https,
     //         host: host,
-    //         path: '/solicitud/app/getAutorizadas/2025-01-01/2025-02-06',
+    //         path: '/aviso/app/getAllAvisos/$inicio/$fin',
     //       ),
     //     );
 
@@ -240,31 +231,14 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
         filteredItems = List.from(items); // Restaura todos los elementos
       } else {
         filteredItems = items.where((item) {
-          final solicitante = removeDiacritics(item['solicitante'] ?? '');
-          final local =
-              removeDiacritics(item['local'] ?? '');
-          return solicitante.contains(normalizedQuery) ||
-              local.contains(normalizedQuery);
+          final descripcion = removeDiacritics(item['descripcion'] ?? '');
+          final fechaInicio =
+              removeDiacritics(item['fecha_inicio'] ?? '');
+          return descripcion.contains(normalizedQuery) ||
+              fechaInicio.contains(normalizedQuery);
         }).toList();
       }
     });
-  }
-
-  // carga de imagenes
-  void handleMultipleImagesFromCamera(Function setStateDialog) async {
-    try {
-      final img.ImagePicker picker = img.ImagePicker();
-      List<String> capturedImages = [];
-        final img.XFile? imageFile = await picker.pickImage(source: img.ImageSource.camera);
-        if (imageFile != null) {
-          capturedImages.add(imageFile.path);
-          setStateDialog(() {
-            imagePaths = List.from(imagePaths)..add(imageFile.path);
-          });
-        }
-    } catch (e) {
-      //log("Error al tomar la foto: $e");
-    }
   }
 
   @override
@@ -316,14 +290,14 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                             controller: searchController,
                             autofocus: true,
                             onChanged: filterItems,
-                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                            style: const TextStyle(color: Colors.black, fontSize: 11),
                             decoration: const InputDecoration(
-                              hintText: "Buscar Servicio o Nombre",
+                              hintText: "Buscar Descripción o Fecha inicio",
                               hintStyle: TextStyle(color: Colors.black),
                               border: InputBorder.none,
                             ),
                           )
-                        : const Text(nameAutorizada),
+                        : const Text(nameAviso),
                     elevation: 1,
                     shadowColor: myColor,
                     backgroundColor: Colors.white,
@@ -456,12 +430,13 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                 
                                       final item = filteredItems[index];
                                       return InkWell(
-                                        onTap: _tipoapp == "3"
-                                        ? () async{
-                                          await _onWillPop(item['data_id'], item['local'], item['solicitante']);
-                                          //log(item['data_id']);
-                                        }
-                                        : null,
+                                        onTap: (){
+                                          if(item['fecha_inicio']==item['fecha_fin']){
+                                            _descripcion(item['fecha_inicio'], item['hora_inicio'],item['descripcion']);
+                                          }else{
+                                            _descripcion(item['fecha_inicio'] +" al "+item['fecha_fin'], item['hora_inicio'], item['descripcion']);
+                                          }
+                                        },
                                         child: Card(
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(20.0),
@@ -473,15 +448,19 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                               children: [
                                                 InkWell(
                                                   onTap: () async{
-                                                    await _descripcion(item['local'], item['descripcion']);
+                                                    if(item['fecha_inicio']==item['fecha_fin']){
+                                                      await _descripcion(item['fecha_inicio'], item['hora_inicio'],item['descripcion']);
+                                                    }else{
+                                                      await _descripcion(item['fecha_inicio'] +" al "+item['fecha_fin'], item['hora_inicio'], item['descripcion']);
+                                                    }
                                                   },
                                                   child: CircleAvatar(
-                                                    backgroundColor: Colors.blueAccent,
+                                                    backgroundColor: Colors.purple,
                                                     radius: MediaQuery.of(context)
                                                             .size
                                                             .width *
                                                         0.06,
-                                                    child: const Icon(Icons.list_alt,
+                                                    child: const Icon(Icons.add_alert_rounded,
                                                         color: Colors.white),
                                                   ),
                                                 ),
@@ -499,34 +478,51 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment.start,
                                                           children: [
-                                                            Text(
-                                                              item['solicitante'],
-                                                              style: const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight: FontWeight.bold,
+                                                            item['fecha_inicio']==item['fecha_fin'] 
+                                                            ? Text(
+                                                              // ignore: prefer_interpolation_to_compose_strings
+                                                              "Periodo: "+item['fecha_inicio'],
+                                                                style: const TextStyle(
+                                                                  fontSize: 15,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                                overflow: TextOverflow.ellipsis, 
+                                                                maxLines: 2,
+                                                              )
+                                                            :  Text(
+                                                                // ignore: prefer_interpolation_to_compose_strings
+                                                                "Periodo:\n"+item['fecha_inicio'] +" al "+item['fecha_fin'],
+                                                                style: const TextStyle(
+                                                                  fontSize: 15,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                                overflow: TextOverflow.ellipsis, 
+                                                                maxLines: 2,
                                                               ),
-                                                              overflow: TextOverflow.ellipsis, 
-                                                              maxLines: 1,
-                                                            ),
+                                                            item['hora_inicio']==""
+                                                            ? const Text(
+                                                                "Todo el día",
+                                                                style: TextStyle(
+                                                                    fontSize: 16),
+                                                                overflow: TextOverflow.ellipsis, 
+                                                                maxLines: 1,
+                                                              ) 
+                                                            : Text(
+                                                                // ignore: prefer_interpolation_to_compose_strings
+                                                                "Hora de inicio: "+item['hora_inicio'],
+                                                                style: const TextStyle(
+                                                                    fontSize: 16),
+                                                                overflow: TextOverflow.ellipsis, 
+                                                                maxLines: 1,
+                                                              ),
+                                                            SizedBox(height: size.height*0.01),
                                                             Text(
-                                                              item['local'],
+                                                              item['descripcion'],
                                                               style: const TextStyle(
-                                                                  fontSize: 16),
-                                                              overflow: TextOverflow.ellipsis, 
-                                                              maxLines: 1,
-                                                            ),
-                                                            Text(
-                                                              "Fecha de Ejecución: ${item['fecha_ejecucion']}",
-                                                              style: const TextStyle(
-                                                                  fontSize: 12),
-                                                            ),
-                                                            Text(
-                                                              item['hora_ejecucion']==""
-                                                              ? "Todo el día"
-                                                              : "Hora de Ejecución: ${item['hora_ejecucion']}",
-                                                              style: const TextStyle(
-                                                                  fontSize: 12),
-                                                            ),
+                                                                    fontSize: 14),
+                                                                overflow: TextOverflow.ellipsis, 
+                                                                maxLines: 2,
+                                                              ),
                                                           ],
                                                         ),
                                                       ),
@@ -534,12 +530,10 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                                                         alignment: Alignment.centerRight,
                                                         child: Padding(
                                                           padding: EdgeInsets.only(right: size.width * 0.01),
-                                                          child: Icon(
+                                                          child: const Icon(
                                                             Icons.arrow_forward_ios_outlined,
                                                             size: 24,
-                                                            color: _tipoapp == "3"
-                                                                   ? Colors.blueAccent
-                                                                   : Colors.grey,
+                                                            color: Colors.purple,
                                                           ),
                                                         ),
                                                       ),
@@ -572,395 +566,30 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
     
   }
 
-  Future<bool> _onWillPop(String id, String local, String solicitante) async {
+  Future<bool> _descripcion(String periodo, String hora, String descripcion) async {
     final Size size = MediaQuery.of(context).size;
     return (await showDialog(
           barrierDismissible: true,
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(local, textAlign: TextAlign.center),
-            content: Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(32.0))),
-            actions: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.green, 
-                        ),
-                        onPressed: () async{
-                          Navigator.of(context).pop(false);
-                          await _onWillPop2(id, local, solicitante);
-                        },
-                        child: const Text('Entrada'),
-                      ),
-                      SizedBox(height: size.height * 0.01),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.blueAccent, 
-                        ),
-                        onPressed: () async{
-                          Navigator.of(context).pop(false);
-                          await _onWillPop3(id, local, solicitante);
-                        },
-                        child: const Text('Salida'),
-                      )
-                    ],
-                  ),
-                ],
-              )
-            ],
-          ),
-        )) ??
-        false;
-  }
-
-  Future<bool> _onWillPop2(String id, String local, String solicitante) async {
-    final Size size = MediaQuery.of(context).size;
-    return (await showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => StatefulBuilder(
-            builder: (context, setStateDialog) =>
-            AlertDialog(
-              title: Text("¿Registrar Entrada de $local?", textAlign: TextAlign.center),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-                      SizedBox(height: size.height * 0.02),
-                      TextField(
-                        controller: _comentarioController,
-                        maxLines: 2, 
-                        decoration: const InputDecoration(
-                          labelText: "Escribe comentarios aquí",
-                          border: OutlineInputBorder(), 
-                        ),
-                      ),
-                      SizedBox(height: size.height * 0.02),
-                      _pickedImage == null
-                      ? const SizedBox.shrink()
-                      : Column(
-                          children: [
-                            Container(
-                              height: size.height * 0.3,
-                              decoration: BoxDecoration(
-                                  color: myColor,
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: FileImage(_pickedImage as File),
-                                  )),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
-                      Column(
-                        children: [
-                          Container(
-                            height: 0,
-                            color: Colors.transparent,
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Container(
-                                height: 10,
-                              ),
-                              if (imagePaths.isEmpty) const SizedBox(height: 0),
-                              if (imagePaths.isNotEmpty)
-                                Container(
-                                  color: Colors.black12,
-                                  child: ImageSlideshow(
-                                    width: double.infinity,
-                                    height: size.height * 0.2,
-                                    initialPage: 0,
-                                    indicatorColor: Colors.blueAccent,
-                                    indicatorBackgroundColor: Colors.white,
-                                    onPageChanged: (value) {},
-                                    autoPlayInterval: 0,
-                                    isLoop: false,
-                                    indicatorRadius: 5,
-                                    indicatorPadding: 7,
-                                    disableUserScrolling: false,
-                                    indicatorBottomPadding: 10,
-                                    children: [
-                                      for (String image in imagePaths)
-                                        Stack(
-                                          alignment: Alignment.topCenter,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 0),
-                                              child: SizedBox(
-                                                width: double.infinity,
-                                                height: size.height * 0.4,
-                                                child: Image.file(
-                                                  File(image),
-                                                  fit: BoxFit.contain,
-                                                  errorBuilder:
-                                                      (context, error, stackTrace) {
-                                                    return Image.file(
-                                                      File('assets/images/user.png'),
-                                                      fit: BoxFit.contain,
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: size.height * 0.02),
-                      GestureDetector(
-                        onTap: () async {
-                          handleMultipleImagesFromCamera(setStateDialog);
-                        },
-                        child: Container(
-                          height: size.height * 0.07,
-                          width: size.height * 0.07,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.blueAccent,
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: size.height * 0.05,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
-              actions: <Widget>[
-                SizedBox(height: size.height * 0.02),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    OutlinedButton(
-                      onPressed: () {
-                        imagePaths = [];
-                        _comentarioController.text="";
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('No'),
-                    ),
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.green, 
-                      ),
-                      onPressed: () async{
-                        showProgressEntrada(context, widget.idapp, id, _comentarioController.text, imagePaths);
-                        _comentarioController.text="";
-                        setStateDialog(() {
-                          imagePaths = [];
-                        });
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('Si'),
-                    ),
-                  ],
-                )
-              ],
+            title: Text(
+              hora==""
+              ? "Periodo: $periodo\n$hora" 
+              : "Periodo: $periodo\nHora de inicio: $hora", 
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), 
+              textAlign: TextAlign.center
             ),
-          ),
-        )) ??
-        false;
-  }
-
-  Future<bool> _onWillPop3(String id, String local, String solicitante) async {
-    final Size size = MediaQuery.of(context).size;
-    return (await showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => StatefulBuilder(
-            builder: (context, setStateDialog) =>
-            AlertDialog(
-              title: Text("¿Registrar Salida de $local?", textAlign: TextAlign.center),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-                      SizedBox(height: size.height * 0.02),
-                      TextField(
-                        controller: _comentarioController,
-                        maxLines: 2, 
-                        decoration: const InputDecoration(
-                          labelText: "Escribe comentarios aquí",
-                          border: OutlineInputBorder(), 
-                        ),
-                      ),
-                      SizedBox(height: size.height * 0.02),
-                      _pickedImage == null
-                      ? const SizedBox.shrink()
-                      : Column(
-                          children: [
-                            Container(
-                              height: size.height * 0.3,
-                              decoration: BoxDecoration(
-                                  color: myColor,
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: FileImage(_pickedImage as File),
-                                  )),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
-                      Column(
-                        children: [
-                          Container(
-                            height: 0,
-                            color: Colors.transparent,
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Container(
-                                height: 10,
-                              ),
-                              if (imagePaths.isEmpty) const SizedBox(height: 0),
-                              if (imagePaths.isNotEmpty)
-                                Container(
-                                  color: Colors.black12,
-                                  child: ImageSlideshow(
-                                    width: double.infinity,
-                                    height: size.height * 0.2,
-                                    initialPage: 0,
-                                    indicatorColor: Colors.blueAccent,
-                                    indicatorBackgroundColor: Colors.white,
-                                    onPageChanged: (value) {},
-                                    autoPlayInterval: 0,
-                                    isLoop: false,
-                                    indicatorRadius: 5,
-                                    indicatorPadding: 7,
-                                    disableUserScrolling: false,
-                                    indicatorBottomPadding: 10,
-                                    children: [
-                                      for (String image in imagePaths)
-                                        Stack(
-                                          alignment: Alignment.topCenter,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 0),
-                                              child: SizedBox(
-                                                width: double.infinity,
-                                                height: size.height * 0.4,
-                                                child: Image.file(
-                                                  File(image),
-                                                  fit: BoxFit.contain,
-                                                  errorBuilder:
-                                                      (context, error, stackTrace) {
-                                                    return Image.file(
-                                                      File('assets/images/user.png'),
-                                                      fit: BoxFit.contain,
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: size.height * 0.02),
-                      GestureDetector(
-                        onTap: () async {
-                          handleMultipleImagesFromCamera(setStateDialog);
-                        },
-                        child: Container(
-                          height: size.height * 0.07,
-                          width: size.height * 0.07,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.blueAccent,
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: size.height * 0.05,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
-              actions: <Widget>[
-                SizedBox(height: size.height * 0.02),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    OutlinedButton(
-                      onPressed: () {
-                        imagePaths = [];
-                        _comentarioController.text="";
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('No'),
-                    ),
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blueAccent, 
-                      ),
-                      onPressed: () async{
-                        showProgressSalida(context, widget.idapp, id, _comentarioController.text, imagePaths);
-                        _comentarioController.text="";
-                        setStateDialog(() {
-                          imagePaths = [];
-                        });
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('Si'),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        )) ??
-        false;
-  }
-
-  Future<bool> _descripcion(String locatario, String descripcion) async {
-    final Size size = MediaQuery.of(context).size;
-    return (await showDialog(
-          barrierDismissible: true,
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(locatario, textAlign: TextAlign.center),
-            content: SingleChildScrollView(child: HtmlWidget(descripcion, textStyle: const TextStyle(fontSize: 15))),
+            content: SingleChildScrollView(
+              child: Center(
+              child: HtmlWidget(
+                descripcion, 
+                textStyle: const TextStyle(fontSize: 15), 
+                customStylesBuilder: (element) {
+                  return {
+                    'text-align': 'center',
+                  };
+                }),
+            )),
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(32.0))),
             actions: <Widget>[
@@ -973,7 +602,7 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
                       Navigator.of(context).pop(false);
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.blueAccent, 
+                      backgroundColor: Colors.purple, 
                     ),
                     child: const Text('Cerrar'),
                   ),
@@ -1005,11 +634,11 @@ class _AutorizadasScreenState extends State<AutorizadasScreen> with SingleTicker
       //firstDate: DateTime.now(),
       dayTextStyle: dayTextStyle,
       calendarType: CalendarDatePicker2Type.range,
-      selectedDayHighlightColor: Colors.blueAccent,
+      selectedDayHighlightColor: Colors.purple,
       closeDialogOnCancelTapped: true,
       firstDayOfWeek: 1,
       weekdayLabelTextStyle: const TextStyle(
-        color: Colors.blueAccent,
+        color: Colors.purple,
         fontWeight: FontWeight.bold,
       ),
       controlsTextStyle: const TextStyle(

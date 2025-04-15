@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:cloudflare/cloudflare.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tizara/config/navigation/route_observer.dart';
 import 'package:tizara/main.dart';
 import '../../../constants/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart' as img;
 
 import '../../widgets/side_menu.dart';
 import '../home/home_screen.dart';
@@ -63,6 +67,12 @@ class _ProveedorScreenState extends State<ProveedorScreen>
     myColorBackground1,
     myColorBackground2,
   ];
+
+  final TextEditingController _comentarioController = TextEditingController();
+
+  File? _pickedImage;
+  //bool _loading = false;
+  List<String> imagePaths = [];
 
   void fistLoad() async {
     setState(() {
@@ -135,6 +145,8 @@ class _ProveedorScreenState extends State<ProveedorScreen>
         ),
       );
     }
+
+    if (!mounted) return;
 
     setState(() {
       isFirstLoadRunning = false;
@@ -277,6 +289,23 @@ class _ProveedorScreenState extends State<ProveedorScreen>
         }).toList();
       }
     });
+  }
+
+  // carga de imagenes
+  void handleMultipleImagesFromCamera(Function setStateDialog) async {
+    try {
+      final img.ImagePicker picker = img.ImagePicker();
+      List<String> capturedImages = [];
+        final img.XFile? imageFile = await picker.pickImage(source: img.ImageSource.camera);
+        if (imageFile != null) {
+          capturedImages.add(imageFile.path);
+          setStateDialog(() {
+            imagePaths = List.from(imagePaths)..add(imageFile.path);
+          });
+        }
+    } catch (e) {
+      //log("Error al tomar la foto: $e");
+    }
   }
 
   @override
@@ -479,43 +508,45 @@ class _ProveedorScreenState extends State<ProveedorScreen>
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
-                                                        children: [
-                                                          Text(
-                                                            item['servicio'],
-                                                            style: const TextStyle(
-                                                              fontSize: 16,
-                                                              fontWeight: FontWeight.bold,
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              item['servicio'],
+                                                              style: const TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                              overflow: TextOverflow.ellipsis, 
+                                                              maxLines: 1,
                                                             ),
-                                                            overflow: TextOverflow.ellipsis, 
-                                                            maxLines: 1,
-                                                          ),
-                                                          Text(
-                                                            item['nombre_contacto'],
-                                                            style: const TextStyle(
-                                                                fontSize: 16),
-                                                            overflow: TextOverflow.ellipsis, 
-                                                            maxLines: 1,
-                                                          ),
-                                                          Text(
-                                                            item['telefono'] == ""
-                                                                ? "S/N"
-                                                                : item['telefono'],
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                          ),
-                                                          Text(
-                                                            item['correo'] == ""
-                                                                ? "Sin correo electrónico"
-                                                                : item['correo'],
-                                                            style: const TextStyle(
-                                                                fontSize: 12),
-                                                            overflow: TextOverflow.ellipsis, 
-                                                            maxLines: 1,
-                                                          ),
-                                                        ],
+                                                            Text(
+                                                              item['nombre_contacto'],
+                                                              style: const TextStyle(
+                                                                  fontSize: 16),
+                                                              overflow: TextOverflow.ellipsis, 
+                                                              maxLines: 1,
+                                                            ),
+                                                            Text(
+                                                              item['telefono'] == ""
+                                                                  ? "S/N"
+                                                                  : item['telefono'],
+                                                              style: const TextStyle(
+                                                                  fontSize: 12),
+                                                            ),
+                                                            Text(
+                                                              item['correo'] == ""
+                                                                  ? "Sin correo electrónico"
+                                                                  : item['correo'],
+                                                              style: const TextStyle(
+                                                                  fontSize: 12),
+                                                              overflow: TextOverflow.ellipsis, 
+                                                              maxLines: 1,
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                       Align(
                                                         alignment: Alignment.centerRight,
@@ -607,138 +638,429 @@ class _ProveedorScreenState extends State<ProveedorScreen>
   Future<bool> _onWillPop2(String id, String servicio, String nombre) async {
     final Size size = MediaQuery.of(context).size;
     return (await showDialog(
-          barrierDismissible: true,
+          barrierDismissible: false,
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text("¿Registrar Entrada de $servicio?", textAlign: TextAlign.center),
-            content: Text(nombre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(32.0))),
-            actions: <Widget>[
-              SizedBox(height: size.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('No'),
+          builder: (context) => StatefulBuilder(
+            builder: (context, setStateDialog) =>
+            AlertDialog(
+              title: Text("¿Registrar Entrada de $servicio?", textAlign: TextAlign.center),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(nombre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
+                      SizedBox(height: size.height * 0.02),
+                      TextField(
+                        controller: _comentarioController,
+                        maxLines: 2, 
+                        decoration: const InputDecoration(
+                          labelText: "Escribe comentarios aquí",
+                          border: OutlineInputBorder(), 
+                        ),
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      _pickedImage == null
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            Container(
+                              height: size.height * 0.3,
+                              decoration: BoxDecoration(
+                                  color: myColor,
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: FileImage(_pickedImage as File),
+                                  )),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      Column(
+                        children: [
+                          Container(
+                            height: 0,
+                            color: Colors.transparent,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Container(
+                                height: 10,
+                              ),
+                              if (imagePaths.isEmpty) const SizedBox(height: 0),
+                              if (imagePaths.isNotEmpty)
+                                Container(
+                                  color: Colors.black12,
+                                  child: ImageSlideshow(
+                                    width: double.infinity,
+                                    height: size.height * 0.2,
+                                    initialPage: 0,
+                                    indicatorColor: Colors.blueAccent,
+                                    indicatorBackgroundColor: Colors.white,
+                                    onPageChanged: (value) {},
+                                    autoPlayInterval: 0,
+                                    isLoop: false,
+                                    indicatorRadius: 5,
+                                    indicatorPadding: 7,
+                                    disableUserScrolling: false,
+                                    indicatorBottomPadding: 10,
+                                    children: [
+                                      for (String image in imagePaths)
+                                        Stack(
+                                          alignment: Alignment.topCenter,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 0),
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                height: size.height * 0.4,
+                                                child: Image.file(
+                                                  File(image),
+                                                  fit: BoxFit.contain,
+                                                  errorBuilder:
+                                                      (context, error, stackTrace) {
+                                                    return Image.file(
+                                                      File('assets/images/user.png'),
+                                                      fit: BoxFit.contain,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      GestureDetector(
+                        onTap: () async {
+                          handleMultipleImagesFromCamera(setStateDialog);
+                        },
+                        child: Container(
+                          height: size.height * 0.07,
+                          width: size.height * 0.07,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.blueAccent,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: size.height * 0.05,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green, 
+                ),
+              ),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              actions: <Widget>[
+                SizedBox(height: size.height * 0.02),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        imagePaths = [];
+                        _comentarioController.text="";
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text('No'),
                     ),
-                    onPressed: () async{
-                      Navigator.of(context).pop(false);
-                      showProgressEntrada(context, widget.idapp, id);
-                    },
-                    child: const Text('Si'),
-                  ),
-                ],
-              )
-            ],
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.green, 
+                      ),
+                      onPressed: () async{
+                        // log(widget.idapp);
+                        // log(id);
+                        // log(_comentarioController.text);
+                        //log(imagePaths[0]);
+
+                        showProgressEntrada(context, widget.idapp, id, _comentarioController.text, imagePaths);
+                        _comentarioController.text="";
+                        setStateDialog(() {
+                          imagePaths = [];
+                        });
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text('Si'),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         )) ??
         false;
   }
 
-  Future<bool> _onWillPop3(String id, String servicio, String nombre) async {
+Future<bool> _onWillPop3(String id, String local, String solicitante) async {
     final Size size = MediaQuery.of(context).size;
     return (await showDialog(
-          barrierDismissible: true,
+          barrierDismissible: false,
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text("¿Registrar Salida de $servicio?", textAlign: TextAlign.center),
-            content: Text(nombre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(32.0))),
-            actions: <Widget>[
-              SizedBox(height: size.height * 0.02),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('No'),
+          builder: (context) => StatefulBuilder(
+            builder: (context, setStateDialog) =>
+            AlertDialog(
+              title: Text("¿Registrar Salida de $local?", textAlign: TextAlign.center),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(solicitante, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
+                      SizedBox(height: size.height * 0.02),
+                      TextField(
+                        controller: _comentarioController,
+                        maxLines: 2, 
+                        decoration: const InputDecoration(
+                          labelText: "Escribe comentarios aquí",
+                          border: OutlineInputBorder(), 
+                        ),
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      _pickedImage == null
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            Container(
+                              height: size.height * 0.3,
+                              decoration: BoxDecoration(
+                                  color: myColor,
+                                  image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: FileImage(_pickedImage as File),
+                                  )),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      Column(
+                        children: [
+                          Container(
+                            height: 0,
+                            color: Colors.transparent,
+                          ),
+                          Column(
+                            children: <Widget>[
+                              Container(
+                                height: 10,
+                              ),
+                              if (imagePaths.isEmpty) const SizedBox(height: 0),
+                              if (imagePaths.isNotEmpty)
+                                Container(
+                                  color: Colors.black12,
+                                  child: ImageSlideshow(
+                                    width: double.infinity,
+                                    height: size.height * 0.2,
+                                    initialPage: 0,
+                                    indicatorColor: Colors.blueAccent,
+                                    indicatorBackgroundColor: Colors.white,
+                                    onPageChanged: (value) {},
+                                    autoPlayInterval: 0,
+                                    isLoop: false,
+                                    indicatorRadius: 5,
+                                    indicatorPadding: 7,
+                                    disableUserScrolling: false,
+                                    indicatorBottomPadding: 10,
+                                    children: [
+                                      for (String image in imagePaths)
+                                        Stack(
+                                          alignment: Alignment.topCenter,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 0),
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                height: size.height * 0.4,
+                                                child: Image.file(
+                                                  File(image),
+                                                  fit: BoxFit.contain,
+                                                  errorBuilder:
+                                                      (context, error, stackTrace) {
+                                                    return Image.file(
+                                                      File('assets/images/user.png'),
+                                                      fit: BoxFit.contain,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      GestureDetector(
+                        onTap: () async {
+                          handleMultipleImagesFromCamera(setStateDialog);
+                        },
+                        child: Container(
+                          height: size.height * 0.07,
+                          width: size.height * 0.07,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.blueAccent,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: size.height * 0.05,
+                            color: Colors.blueAccent,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.blueAccent, 
+                ),
+              ),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              actions: <Widget>[
+                SizedBox(height: size.height * 0.02),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        imagePaths = [];
+                        _comentarioController.text="";
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text('No'),
                     ),
-                    onPressed: () async{
-                      Navigator.of(context).pop(false);
-                      showProgressSalida(context, widget.idapp, id);
-                    },
-                    child: const Text('Si'),
-                  ),
-                ],
-              )
-            ],
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.blueAccent, 
+                      ),
+                      onPressed: () async{
+                        // log(widget.idapp);
+                        // log(id);
+                        // log(_comentarioController.text);
+                        //log(imagePaths[0]);
+
+                        showProgressSalida(context, widget.idapp, id, _comentarioController.text, imagePaths);
+                        _comentarioController.text="";
+                        setStateDialog(() {
+                          imagePaths = [];
+                        });
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text('Si'),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         )) ??
         false;
   }
-}
 
-// PageRouteBuilder _buildPageRoute(Widget page) {
-//   return PageRouteBuilder(
-//     barrierColor: Colors.black.withOpacity(0.6),
-//     opaque: false,
-//     pageBuilder: (_, __, ___) => page,
-//     transitionDuration: const Duration(milliseconds: 200),
-//     transitionsBuilder: (_, animation, __, child) {
-//       return BackdropFilter(
-//         filter: ImageFilter.blur(
-//           sigmaX: 5 * animation.value,
-//           sigmaY: 5 * animation.value,
-//         ),
-//         child: FadeTransition(
-//           opacity: animation,
-//           child: child,
-//         ),
-//       );
-//     },
-//   );
-// }
+  // add Imagen
+  Future<String> _addImagen(idUsuario, proveedorId, imagenId, varianteUno, varianteDos, tipo) async {
+    try {
+      var data = {
+        "id": proveedorId, 
+        "id_usuario": idUsuario, 
+        "imagen_id": imagenId, 
+        "variante_uno": varianteUno, 
+        "variante_dos": varianteDos,
+        "tipo": tipo,
+      };
 
-// Entrada
-Future<String> _entrada(idUsuario, proveedorId) async {
-  try {
-    var data = {"idUsuario": idUsuario, "proveedor_id": proveedorId};
-    final response = await http.post(Uri(
-      scheme: https,
-      host: host,
-      path: '/proveedor/app/addEntradaBitacora/',
-    ), 
-    body: data
-    );
+      final response = await http.post(Uri(
+        scheme: https,
+        host: host,
+        path: '/imagen/app/imagenProveedor/',
+      ), 
+      body: data
+      );
 
-    if (response.statusCode == 200) {
-      String body3 = utf8.decode(response.bodyBytes);
-      var jsonData = jsonDecode(body3);
-      if (jsonData['response'] == true) {
-        return 'Entrada registrada exitosamente';
+      if (response.statusCode == 200) {
+        String body3 = utf8.decode(response.bodyBytes);
+        var jsonData = jsonDecode(body3);
+        if (jsonData['response'] == true) {
+          return 'Imagen registrada exitosamente';
+        } else {
+          return 'Error, verificar conexión a Internet';
+        }
       } else {
         return 'Error, verificar conexión a Internet';
       }
-    } else {
+    } catch (e) {
       return 'Error, verificar conexión a Internet';
     }
-  } catch (e) {
-    return 'Error, verificar conexión a Internet';
   }
-}
 
-showProgressEntrada(BuildContext context, String idUsuario, String proveedorId) async {
-  var result = await showDialog(
-    context: context,
-    builder: (context) => FutureProgressDialog(_entrada(idUsuario, proveedorId)),
-  );
-  // ignore: use_build_context_synchronously
-  showResultDialogEntrada(context, result);
-}
-
-Future<void> showResultDialogEntrada(BuildContext context, String result) async {  
-  if (result == 'Error, verificar conexión a Internet') {
+  Future<void> showResultDialog(BuildContext context, String result) async {  
+    if (result == 'Error, verificar conexión a Internet') {
+        HapticFeedback.heavyImpact();
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent, 
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: const Icon(
+                    Icons.error,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontStyle: FontStyle.normal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 10,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+    }else if (result == 'No hay entrada registrada') {
       HapticFeedback.heavyImpact();
       scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
@@ -782,92 +1104,7 @@ Future<void> showResultDialogEntrada(BuildContext context, String result) async 
           duration: const Duration(seconds: 3),
         ),
       );
-  } else {
-    HapticFeedback.heavyImpact();
-    scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.green, 
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.black),
-              ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                result,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 10,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-}
-
-// Salida
-Future<String> _salida(idUsuario, proveedorId) async {
-  try {
-    var data = {"idUsuario": idUsuario, "proveedor_id": proveedorId};
-    final response = await http.post(Uri(
-      scheme: https,
-      host: host,
-      path: '/proveedor/app/editSalidaBitacora/',
-    ), 
-    body: data
-    );
-
-    if (response.statusCode == 200) {
-      String body3 = utf8.decode(response.bodyBytes);
-      var jsonData = jsonDecode(body3);
-      if (jsonData['response'] == true) {
-        return 'Salida registrada exitosamente';
-      } else {
-        return 'Error, verificar conexión a Internet';
-      }
     } else {
-      return 'Error, verificar conexión a Internet';
-    }
-  } catch (e) {
-    return 'Error, verificar conexión a Internet';
-  }
-}
-
-showProgressSalida(BuildContext context, String idUsuario, String proveedorId) async {
-  var result = await showDialog(
-    context: context,
-    builder: (context) => FutureProgressDialog(_salida(idUsuario, proveedorId)),
-  );
-  // ignore: use_build_context_synchronously
-  showResultDialogSalida(context, result);
-}
-
-Future<void> showResultDialogSalida(BuildContext context, String result) async {  
-  if (result == 'Error, verificar conexión a Internet') {
       HapticFeedback.heavyImpact();
       scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
@@ -877,12 +1114,12 @@ Future<void> showResultDialogSalida(BuildContext context, String result) async {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent, 
+                  color: Colors.green, 
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.black),
                 ),
                 child: const Icon(
-                  Icons.error,
+                  Icons.check,
                   color: Colors.black,
                 ),
               ),
@@ -901,7 +1138,7 @@ Future<void> showResultDialogSalida(BuildContext context, String result) async {
               ),
             ],
           ),
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           shape: RoundedRectangleBorder(
@@ -911,49 +1148,194 @@ Future<void> showResultDialogSalida(BuildContext context, String result) async {
           duration: const Duration(seconds: 3),
         ),
       );
-  } else {
-    HapticFeedback.heavyImpact();
-    scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent, 
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.black),
-              ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                result,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.blueAccent,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 10,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    }
   }
+
+  // Entrada
+  Future<String> _entrada(idUsuario, proveedorId, notasVigilancia) async {
+    // log(idUsuario);
+    // log(proveedorId);
+    // log(notasVigilancia);
+    try {
+
+      var data = {
+        "idUsuario": idUsuario, 
+        "proveedor_id": proveedorId,
+        "notas_entrada": notasVigilancia, 
+      };
+
+      final response = await http.post(Uri(
+        scheme: https,
+        host: host,
+        path: '/proveedor/app/addEntradaBitacora/',
+      ), 
+      body: data
+      );
+
+      if (response.statusCode == 200) {
+        String body3 = utf8.decode(response.bodyBytes);
+        var jsonData = jsonDecode(body3);
+        if (jsonData['response'] == true) {
+          return 'Entrada registrada exitosamente';
+        } else {
+          return 'Error, verificar conexión a Internet';
+        }
+      } else {
+        return 'Error, verificar conexión a Internet';
+      }
+    } catch (e) {
+      return 'Error, verificar conexión a Internet';
+    }
+  }
+
+  showProgressEntrada(BuildContext context, String idUsuario, String proveedorId, String notasVigilancia, List<String> imagePaths) async {
+
+    EasyLoading.show(
+      status: 'Guardando...',
+      dismissOnTap: false,
+      maskType: EasyLoadingMaskType.clear,
+    );
+
+
+    for (String image in imagePaths) {
+      String customFileName = "Tizara_proveedor_entrada_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      String variante0 = "", variante1 = "", imagenId = "";
+      CloudflareHTTPResponse<CloudflareImage?> responseFromPath =
+        await cloudflare.imageAPI.upload(
+          fileName: customFileName,
+          contentFromPath: DataTransmit<String>(
+            data: image,
+            progressCallback: (counter, total) {
+              // log('Upload progress: $counter/$total');
+            }
+          )
+        );
+      // log(responseFromPath.body!.toString());
+      if(responseFromPath.body!.variants[0].substring(responseFromPath.body!.variants[0].length-6) =="public"){
+        variante1 = responseFromPath.body!.variants[0];
+        variante0 = responseFromPath.body!.variants[1];
+        List<String> parts = variante1.split("/");
+        if (parts.length > 5) {
+          imagenId = parts[parts.length - 2];
+        }else{
+          imagenId = "";
+        }
+      }else{
+        variante1 = responseFromPath.body!.variants[1];
+        variante0 = responseFromPath.body!.variants[0];
+        List<String> parts = variante1.split("/");
+        if (parts.length > 5) {
+          imagenId = parts[parts.length - 2];
+        }else{
+          imagenId = "";
+        }
+      }
+
+      // add imagen
+      // ignore: unused_local_variable
+      var resultado = await _addImagen(idUsuario, proveedorId, imagenId, variante0, variante1, "1");
+      // log(resultado);
+    }
+
+    var result = await _entrada(idUsuario, proveedorId, notasVigilancia);
+    // log(result);
+
+    EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
+    showResultDialog(context, result);
+  }
+
+  // Salida
+  Future<String> _salida(idUsuario, proveedorId, notasVigilancia) async {
+    try {
+
+      var data = {
+        "idUsuario": idUsuario, 
+        "proveedor_id": proveedorId,
+        "notas_salida": notasVigilancia, 
+      };
+
+      final response = await http.post(Uri(
+        scheme: https,
+        host: host,
+        path: '/proveedor/app/editSalidaBitacora/',
+      ), 
+      body: data
+      );
+
+      if (response.statusCode == 200) {
+        String body3 = utf8.decode(response.bodyBytes);
+        var jsonData = jsonDecode(body3);
+        if (jsonData['response'] == true) {
+          return 'Salida registrada exitosamente';
+        } else if(jsonData['message'] == "No hay entrada registrada"){
+          return "No hay entrada registrada";
+        } else {
+          return 'Error, verificar conexión a Internet';
+        }
+      } else {
+        return 'Error, verificar conexión a Internet';
+      }
+    } catch (e) {
+      return 'Error, verificar conexión a Internet';
+    }
+  }
+
+  showProgressSalida(BuildContext context, String idUsuario, String proveedorId, String notasVigilancia, List<String> imagePaths) async {
+
+    EasyLoading.show(
+      status: 'Guardando...',
+      dismissOnTap: false,
+      maskType: EasyLoadingMaskType.clear,
+    );
+
+
+    for (String image in imagePaths) {
+      String customFileName = "Tizara_proveedor_salida_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      String variante0 = "", variante1 = "", imagenId = "";
+      CloudflareHTTPResponse<CloudflareImage?> responseFromPath =
+        await cloudflare.imageAPI.upload(
+          fileName: customFileName,
+          contentFromPath: DataTransmit<String>(
+            data: image,
+            progressCallback: (counter, total) {
+              // log('Upload progress: $counter/$total');
+            }
+          )
+        );
+      // log(responseFromPath.body!.toString());
+      if(responseFromPath.body!.variants[0].substring(responseFromPath.body!.variants[0].length-6) =="public"){
+        variante1 = responseFromPath.body!.variants[0];
+        variante0 = responseFromPath.body!.variants[1];
+        List<String> parts = variante1.split("/");
+        if (parts.length > 5) {
+          imagenId = parts[parts.length - 2];
+        }else{
+          imagenId = "";
+        }
+      }else{
+        variante1 = responseFromPath.body!.variants[1];
+        variante0 = responseFromPath.body!.variants[0];
+        List<String> parts = variante1.split("/");
+        if (parts.length > 5) {
+          imagenId = parts[parts.length - 2];
+        }else{
+          imagenId = "";
+        }
+      }
+
+      // add imagen
+      // ignore: unused_local_variable
+      var resultado = await _addImagen(idUsuario, proveedorId, imagenId, variante0, variante1, "2");
+      // log(resultado);
+    }
+
+    var result = await _salida(idUsuario, proveedorId, notasVigilancia);
+    // log(result);
+
+    EasyLoading.dismiss();
+    // ignore: use_build_context_synchronously
+    showResultDialog(context, result);
+  }
+
 }
